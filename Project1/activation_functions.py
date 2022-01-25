@@ -17,5 +17,5 @@ class Sigmoid(ActivationFunction):
         return 1 / (1 + np.exp(-x))
 
     def df(self, x):
-        return Sigmoid.f(x) * (1 - Sigmoid.f(x))
+        return self.f(x) * (1 - self.f(x))
 
