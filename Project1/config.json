@@ -1,0 +1,21 @@
+{
+    "regularization": "lr1",
+    "regularization_weight": 0.001,
+    "learning_rate": 0.01,
+    "loss_function": "mean_squared",
+    "input_dimension": 30,
+    "output_activation": "softmax",
+    "layers": [{
+            "size": 100,
+            "activation_function": "ReLU",
+            "weight_range": "glorot",
+            "learning_rate": 0.01
+        },
+        {
+            "size": 5,
+            "activation_function": "ReLU",
+            "weight_range": "glorot",
+            "bias_range": [0, 1]
+        }
+    ]
+}
