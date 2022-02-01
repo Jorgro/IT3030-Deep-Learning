@@ -1,9 +1,5 @@
-from typing import List
-import numpy as np
-from activation_functions import Sigmoid, ActivationFunction
-import os
-import pickle
 import json
+from network import NeuralNetwork
 
 # TODO:
 # - Add bias weights update (lmao)
@@ -17,7 +13,7 @@ if __name__ == "__main__":
         config = json.load(f)
     print(config)
     print("Running main application")
-    # nn = NeuralNetwork()
-    # nn.load_data()
-    # nn.train()
-
+    nn = NeuralNetwork(config)
+    print(nn)
+    nn.load_data()
+    nn.train()

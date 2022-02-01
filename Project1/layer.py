@@ -9,12 +9,14 @@ class Layer:
         output_nodes,
         activation_function: ActivationFunction,
         weights,
-        bias_weights
+        bias_weights,
+        learning_rate,
     ):
+        self.input_dim = input_nodes
+        self.output_dim = output_nodes
         self.weights = weights
         self.bias_weights = bias_weights
-        #self.weights = np.random.rand(output_nodes, input_nodes) - 0.5
-        #self.bias_weights = np.ones((output_nodes, 1))
+        self.learning_rate = learning_rate
         self.activation_function = activation_function
         self.activation = np.zeros(output_nodes)
         self.weighted_sums = np.zeros(output_nodes)
@@ -23,3 +25,6 @@ class Layer:
         self.weighted_sums = self.weights @ X + self.bias_weights
         self.activation = self.activation_function.f(self.weighted_sums)
         return self.activation
+
+    def __repr__(self):
+        return f"Layer({self.input_dim}, {self.output_dim}, activation={self.activation_function})"

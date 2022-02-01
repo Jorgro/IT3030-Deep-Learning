@@ -6,16 +6,17 @@
     "input_dimension": 30,
     "output_activation": "softmax",
     "layers": [{
-            "size": 100,
+            "size": 25,
             "activation_function": "ReLU",
-            "weight_range": "glorot",
-            "learning_rate": 0.01
+            "weight_range": "",
+            "learning_rate": 0.01,
+            "bias_range": ""
         },
         {
-            "size": 5,
-            "activation_function": "ReLU",
-            "weight_range": "glorot",
-            "bias_range": [0, 1]
+            "size": 1,
+            "activation_function": "Sigmoid",
+            "weight_range": "",
+            "bias_range": ""
         }
     ]
 }

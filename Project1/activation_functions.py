@@ -19,6 +19,9 @@ class Sigmoid(ActivationFunction):
     def df(self, x):
         return self.f(x) * (1 - self.f(x))
 
+    def __repr__(self):
+        return "Sigmoid"
+
 
 class ReLU(ActivationFunction):
     def f(self, x):
@@ -27,10 +30,22 @@ class ReLU(ActivationFunction):
     def df(self, x):
         return 1.0 * (x > 0)
 
+    def __repr__(self):
+        return "ReLU"
+
+
 class Softmax(ActivationFunction):
     def f(self, x):
-        e_x = np.exp(x -np.max(x))
+        e_x = np.exp(x - np.max(x))
         return e_x / e_x.sum(axis=0)
 
     def df(self, x):
         pass
+
+    def __repr__(self):
+        return "Softmax"
+
+
+if __name__ == "__main__":
+    relu = ReLU()
+    print(relu.df(-0.01))
