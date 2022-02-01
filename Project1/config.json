@@ -8,15 +8,15 @@
     "layers": [{
             "size": 25,
             "activation_function": "ReLU",
-            "weight_range": "",
+            "weight_range": "glorot",
             "learning_rate": 0.01,
             "bias_range": ""
         },
         {
             "size": 1,
             "activation_function": "Sigmoid",
-            "weight_range": "",
-            "bias_range": ""
+            "weight_range": "glorot",
+            "bias_range": "glorot"
         }
     ]
 }

@@ -2,10 +2,9 @@ import json
 from network import NeuralNetwork
 
 # TODO:
-# - Add bias weights update (lmao)
-# - Add LR1 / LR2 regularization
-# - Add dynamic network size
 # - Add dynamic loss function
+# - Data generation
+# - Cross-entropy loss function
 
 if __name__ == "__main__":
     print("Loading config.")

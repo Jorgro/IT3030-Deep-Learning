@@ -40,7 +40,7 @@ class Softmax(ActivationFunction):
         return e_x / e_x.sum(axis=0)
 
     def df(self, x):
-        pass
+        return np.diagflat(x) + np.outer(x, -x)
 
     def __repr__(self):
         return "Softmax"
@@ -49,3 +49,7 @@ class Softmax(ActivationFunction):
 if __name__ == "__main__":
     relu = ReLU()
     print(relu.df(-0.01))
+
+    softmax = Softmax()
+    print(softmax.df(np.array([2, 3])))
+
