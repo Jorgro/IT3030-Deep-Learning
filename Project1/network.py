@@ -161,7 +161,7 @@ class NeuralNetwork:
         # ) - self.alpha * self.regularization(self.layers[-1].bias_weights)
 
     def train(self):
-        for i in range(500):
+        for i in range(100):
             print("Epoch: ", i)
             self.propagate_backward(self.x_train, self.y_train)
 
@@ -174,12 +174,15 @@ class NeuralNetwork:
 
         # pred = np.round(pred, 3)
 
-        print("Pred: ", pred)
-        print("test: ", self.y_test)
+        # print("Pred: ", pred)
+        # print("test: ", self.y_test)
 
         if self.config["dataset"] == "dataset-j.p":
             k = np.argmax(pred, axis=1)
+            p = np.argmax(self.y_test, axis=1)
             print(k)
+            print(p)
+            print("Accuracy: ", np.sum(k == p) / k.shape[0])
         else:
             for i in range(n):
                 # Predict by running forward pass through the neural network
