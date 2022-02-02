@@ -2,7 +2,7 @@
     "dataset": "data_breast_cancer.p",
     "regularization": "lr2",
     "regularization_weight": 0.001,
-    "learning_rate": 0.01,
+    "learning_rate": 0.05,
     "loss_function": "mean_squared",
     "input_dimension": 30,
     "output_activation": "softmax",

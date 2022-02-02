@@ -20,7 +20,7 @@
         },
         {
             "size": 4,
-            "activation_function": "Sigmoid",
+            "activation_function": "Softmax",
             "weight_range": "",
             "bias_range": ""
         }

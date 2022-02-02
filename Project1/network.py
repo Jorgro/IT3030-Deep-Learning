@@ -118,14 +118,14 @@ class NeuralNetwork:
         #    "(y - self.layers[-1].activation): ", (y - self.layers[-1].activation).shape
         # )
 
-        deltas[-1] = np.multiply(
-            self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
-            (y - self.layers[-1].activation),
-        )
+        #deltas[-1] = np.multiply(
+        #    self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
+        #    (y - self.layers[-1].activation),
+        #)
 
         # print("deltas 2: ", deltas[-1])
         # Softmax + Cross-Entropy Loss ??
-        # deltas[-1] = y - self.layers[-1].activation
+        deltas[-1] = y - self.layers[-1].activation
         # print(deltas[-1])
 
         for i in range(len(self.layers) - 2, -1, -1):
@@ -161,7 +161,7 @@ class NeuralNetwork:
         # ) - self.alpha * self.regularization(self.layers[-1].bias_weights)
 
     def train(self):
-        for i in range(100):
+        for i in range(500):
             print("Epoch: ", i)
             self.propagate_backward(self.x_train, self.y_train)
 
