@@ -17,11 +17,13 @@ class DataGenerator:
     def __init__(
         self,
         nr_images: int,
+        image_size: int,
         noise: float,
         train_size: float = 0.70,
         test_size: float = 0.20,
         val_size: float = 0.10,
     ):
+        self.image_size = image_size
         self.nr_images = nr_images
         self.noise = noise
 
@@ -58,6 +60,23 @@ class DataGenerator:
         result[probs < prob] = 0
         # result[result > 0] = 255
         imsave(f"{path}/rectangle1.png", result)
+
+    @staticmethod
+    def generate_rectangle(img):
+        pass
+
+    @staticmethod
+    def generate_circle(img):
+        pass
+
+    @staticmethod
+    def generate_vertical_bars(img):
+        pass
+
+    @staticmethod
+    def generate_horizontal_bars(img):
+
+        return img
 
 
 if __name__ == "__main__":

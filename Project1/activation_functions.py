@@ -40,7 +40,19 @@ class Softmax(ActivationFunction):
         return exp_max / np.sum(exp_max, axis=1, keepdims=True)
 
     def df(self, x):
-        return np.diagflat(x) + np.outer(x, -x)
+        x = x.reshape(-1, 1)
+        return np.diagflat(x) - np.dot(x, x.T)
+
+    def gradient(self, z, da):
+        # https://themaverickmeerkat.com/2019-10-23-Softmax/
+        m, n = z.shape
+        p = self.f(z)
+        tensor1 = np.einsum("ij,ik->ijk", p, p)
+        tensor2 = np.einsum("ij,jk->ijk", p, np.eye(n, n))
+        dSoftmax = tensor2 - tensor1
+        print("dSoftmax: ", dSoftmax.shape)
+        dz = np.einsum("ijk,ik->ij", dSoftmax, da)
+        return dz
 
     def __repr__(self):
         return "Softmax"
@@ -55,4 +67,14 @@ if __name__ == "__main__":
     print(softmax.f(np.array([[2, 3, 6, 8], [3, 5, 4, 10]])))
     sigmoid = Sigmoid()
     print(sigmoid.f(np.array([[2, 3, 6, 8], [3, 5, 4, 10]])))
+
+    a = np.array([np.arange(1, 5)])
+    y = np.array([[0, 1, 0, 0]])
+    s = softmax.f(a)
+    print("s: ", s)
+    c = -y / s
+    print("c: ", c)
+    print("c @ s': ", c @ softmax.df(s))
+    print("s - y: ", s - y)
+    print("Grad: ", c @ softmax.gradient(s))
 
