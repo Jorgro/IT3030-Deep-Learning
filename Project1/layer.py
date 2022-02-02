@@ -22,7 +22,7 @@ class Layer:
         self.weighted_sums = np.zeros(output_nodes)
 
     def propagate(self, X: np.ndarray):
-        self.weighted_sums = self.weights @ X + self.bias_weights
+        self.weighted_sums = (self.weights @ X.T + self.bias_weights).T
         self.activation = self.activation_function.f(self.weighted_sums)
         return self.activation
 

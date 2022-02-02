@@ -16,3 +16,4 @@ if __name__ == "__main__":
     print(nn)
     nn.load_data()
     nn.train()
+    # print(nn)

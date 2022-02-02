@@ -36,8 +36,8 @@ class ReLU(ActivationFunction):
 
 class Softmax(ActivationFunction):
     def f(self, x):
-        e_x = np.exp(x - np.max(x))
-        return e_x / e_x.sum(axis=0)
+        exp_max = np.exp(x - np.max(x, axis=1, keepdims=True))
+        return exp_max / np.sum(exp_max, axis=1, keepdims=True)
 
     def df(self, x):
         return np.diagflat(x) + np.outer(x, -x)
@@ -49,7 +49,10 @@ class Softmax(ActivationFunction):
 if __name__ == "__main__":
     relu = ReLU()
     print(relu.df(-0.01))
-
+    arr = np.array([[2, 3, 6, 8], [3, 5, 4, 10]])
     softmax = Softmax()
     print(softmax.df(np.array([2, 3])))
+    print(softmax.f(np.array([[2, 3, 6, 8], [3, 5, 4, 10]])))
+    sigmoid = Sigmoid()
+    print(sigmoid.f(np.array([[2, 3, 6, 8], [3, 5, 4, 10]])))
 

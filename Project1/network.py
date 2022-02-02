@@ -8,6 +8,8 @@ from activation_functions import Sigmoid, ReLU, Softmax
 
 class NeuralNetwork:
     def __init__(self, config: dict):
+        self.config = config
+        self.dataset_path = os.path.join(os.getcwd(), config["dataset"])
         regularization = config["regularization"]
         self.alpha = config["regularization_weight"]
         self.lr = config["learning_rate"]
@@ -64,9 +66,7 @@ class NeuralNetwork:
         else:
             return np.random.uniform(-0.5, 0.5, (out_dim, in_dim))
 
-    def load_data(
-        self, file_path: str = os.path.join(os.getcwd(), "data_breast_cancer.p")
-    ) -> None:
+    def load_data(self) -> None:
         """
         Load data for training and testing the model.
         :param file_path: Path to the file 'data_breast_cancer.p' downloaded from Blackboard. If no arguments is given,
@@ -76,10 +76,19 @@ class NeuralNetwork:
         x: shape = (number of examples, number of features)
         y: shape = (number of examples)
         """
-        with open(file_path, "rb") as file:
+        with open(self.dataset_path, "rb") as file:
             data = pickle.load(file)
-            self.x_train, self.y_train = data["x_train"], data["y_train"]
-            self.x_test, self.y_test = data["x_test"], data["y_test"]
+            self.x_train, self.y_train = (
+                np.array(data["x_train"]),
+                np.array(data["y_train"]),
+            )
+            self.x_test, self.y_test = (
+                np.array(data["x_test"]),
+                np.array(data["y_test"]),
+            )
+            if len(self.y_train.shape) < 2:
+                self.y_train = self.y_train.reshape((self.y_train.shape[0], 1))
+                self.y_test = self.y_test.reshape((self.y_test.shape[0], 1))
 
     def propagate_forward(self, X: np.ndarray) -> np.ndarray:
         """Propagate an input forward to receive activation in NN.
@@ -90,7 +99,6 @@ class NeuralNetwork:
         Returns:
             np.ndarray: Output layer activation.
         """
-        X = X.T
         for layer in self.layers:
             X = layer.propagate(X)
         return X
@@ -98,70 +106,59 @@ class NeuralNetwork:
     def propagate_backward(self, X: np.ndarray, y: np.ndarray):
 
         self.propagate_forward(X)  # Each layer memorizes by itself
-
         m = y.shape[0]
         deltas = [[] for _ in range(len(self.layers))]
-        deltas[-1] = self.layers[-1].activation_function.df(
-            self.layers[-1].weighted_sums
-        ) * (y - self.layers[-1].activation)
+        # print("deltas 1: ", deltas[-1])
+        # Sigmoid + Mean Squared:
+        # print("self.layers[-1].weighted_sums: ", self.layers[-1].weighted_sums.shape)
+        # print("y: ", y.shape)
+        # print("self.layers[-1].activation: ", self.layers[-1].activation.shape)
 
-        self.layers[-1].weights += self.lr * (
-            deltas[-1] @ self.layers[-2].activation.T
-            - self.alpha * self.regularization(self.layers[-1].weights)
+        # print(
+        #    "(y - self.layers[-1].activation): ", (y - self.layers[-1].activation).shape
+        # )
+
+        deltas[-1] = np.multiply(
+            self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
+            (y - self.layers[-1].activation),
         )
 
-        for i in range(len(self.layers) - 2, -1, -1):
-            deltas[i] = self.layers[i].activation_function.df(
-                self.layers[i].weighted_sums
-            ) * (self.layers[i + 1].weights.T @ deltas[i + 1])
+        # print("deltas 2: ", deltas[-1])
+        # Softmax + Cross-Entropy Loss ??
+        # deltas[-1] = y - self.layers[-1].activation
+        # print(deltas[-1])
 
+        for i in range(len(self.layers) - 2, -1, -1):
+            # print("self.layers[i + 1].weights ", self.layers[i + 1].weights.shape)
+            # print("deltas[i + 1] ", deltas[i + 1].shape)
+
+            deltas[i] = np.multiply(
+                self.layers[i].activation_function.df(self.layers[i].weighted_sums),
+                (deltas[i + 1] @ self.layers[i + 1].weights),
+            )
+
+        for i in range(len(self.layers) - 1, -1, -1):
             if i == 0:
-                prev_activation = X
+                prev_activation = X.T
             else:
                 prev_activation = self.layers[i - 1].activation.T
 
+            # print("deltas[i] ", deltas[i].shape)
+            # print("prev ", prev_activation.shape)
+
             self.layers[i].weights += self.lr * (
-                (deltas[i] @ prev_activation)
-                - self.alpha * self.regularization(self.layers[i].weights)
-            )
+                (deltas[i].T @ prev_activation.T)
+            ) - self.alpha * self.regularization(self.layers[i].weights)
             self.layers[i].bias_weights += self.lr * (
-                np.sum(deltas[i], 1).reshape((self.layers[i].output_dim, 1))
-                - self.alpha * self.regularization(self.layers[i].bias_weights)
-            )
+                np.sum(deltas[i], 0).reshape((self.layers[i].output_dim, 1))
+            ) - self.alpha * self.regularization(self.layers[i].bias_weights)
 
-        ########
-        """deltas[2] = self.output_layer.activation_function.df(
-            self.output_layer.weighted_sums
-        ) * (y - self.output_layer.activation)
-
-        layer = self.hidden_layers[0]
-        deltas[1] = layer.activation_function.df(layer.weighted_sums) * (
-            self.output_layer.weights.T @ deltas[2]
-        )
-
-        deltas[0] = self.input_layer.activation_function.df(
-            self.input_layer.weighted_sums
-        ) * (self.hidden_layers[0].weights @ deltas[1])
-
-        self.output_layer.weights += 0.01 * (
-            deltas[2] @ self.hidden_layers[0].activation.T
-            - self.alpha * self.output_layer.weights / m
-        )
-
-        self.input_layer.weights += 0.01 * (
-            deltas[0] @ X - self.alpha * self.input_layer.weights / m
-        )
-
-        layer = self.hidden_layers[0]
-        layer.weights += 0.01 * (
-            (deltas[1] @ self.input_layer.activation.T)
-            - self.alpha * layer.weights / np.abs(layer.weights)
-        )
-        layer.bias_weights += 0.01 * (
-            np.sum(deltas[1], 1).reshape((25, 1))
-            - self.alpha * layer.bias_weights / np.abs(layer.bias_weights)
-        ) """
-        #######
+        # self.layers[-1].weights += self.lr * (
+        #     deltas[-1] @ self.layers[-2].activation.T
+        # ) - self.alpha * self.regularization(self.layers[-1].weights)
+        # self.layers[-1] += self.lr * (
+        #     np.sum(deltas[-1], 1).reshape((self.layers[-1].output_dim, 1))
+        # ) - self.alpha * self.regularization(self.layers[-1].bias_weights)
 
     def train(self):
         for i in range(500):
@@ -172,18 +169,25 @@ class NeuralNetwork:
 
         n = len(self.y_test)
         correct = 0
-        pred = self.propagate_forward(self.x_test)[0]
-        pred = np.round(pred, 3)
+        # pred = self.propagate_forward(self.x_test)[0]
+        pred = self.propagate_forward(self.x_test)
+
+        # pred = np.round(pred, 3)
 
         print("Pred: ", pred)
         print("test: ", self.y_test)
-        for i in range(n):
-            # Predict by running forward pass through the neural network
-            # Sanity check of the prediction
-            assert 0 <= pred[i] <= 1, "The prediction needs to be in [0, 1] range."
-            # Check if right class is predicted
-            correct += self.y_test[i] == round(float(pred[i]))
-        print("Accuracy: ", round(correct / n, 3))
+
+        if self.config["dataset"] == "dataset-j.p":
+            k = np.argmax(pred, axis=1)
+            print(k)
+        else:
+            for i in range(n):
+                # Predict by running forward pass through the neural network
+                # Sanity check of the prediction
+                assert 0 <= pred[i] <= 1, "The prediction needs to be in [0, 1] range."
+                # Check if right class is predicted
+                correct += self.y_test[i][0] == round(float(pred[i][0]))
+            print("Accuracy: ", round(correct / n, 3))
 
     def __repr__(self):
         representation = "NeuralNetwork("
