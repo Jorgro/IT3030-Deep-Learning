@@ -13,10 +13,10 @@ class NeuralNetwork:
         regularization = config["regularization"]
         self.alpha = config["regularization_weight"]
         self.lr = config["learning_rate"]
-        loss_function = config["loss_function"]
+        self.loss_function = config["loss_function"]
         input_dimension = config["input_dimension"]
-        output_activation = config["output_activation"]
         layers = config["layers"]
+        self.epochs = config["epochs"]
 
         if regularization == "lr1":
             self.regularization = lambda X: X / np.abs(X)
@@ -29,6 +29,7 @@ class NeuralNetwork:
 
         for layer in layers:
             act_func_str = layer["activation_function"]
+            self.output_activation = act_func_str
             if act_func_str == "Softmax":
                 act_func = Softmax()
             elif act_func_str == "ReLU":
@@ -111,6 +112,20 @@ class NeuralNetwork:
         # print("deltas 1: ", deltas[-1])
         # Sigmoid + Mean Squared:
 
+        if self.output_activation != "Softmax" and self.loss_function == "MSE":
+            deltas[-1] = np.multiply(
+                self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
+                (y - self.layers[-1].activation),
+            )
+        elif (
+            self.output_activation == "Softmax" and self.loss_function == "MSE"
+        ):  # Very complex delta..
+            deltas[-1] = -self.layers[-1].activation_function.gradient(
+                self.layers[-1].weighted_sums, -y / self.layers[-1].activation
+            )
+        else:  # Softmax + Cross Entropy Loss gives us a very simple delta!
+            deltas[-1] = y - self.layers[-1].activation
+
         # print(
         #     self.layers[-1]
         #     .activation_function.gradient(
@@ -121,17 +136,14 @@ class NeuralNetwork:
         # print((self.layers[-1].activation / y).shape)
         # print(self.layers[-1].weighted_sums.shape)
 
-        # deltas[-1] = np.multiply(
-        #     self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
-        #     (y - self.layers[-1].activation),
-        # )
         # Cross entropy + random shit
-        deltas[-1] = -self.layers[-1].activation_function.gradient(
-            self.layers[-1].weighted_sums, -y / self.layers[-1].activation
-        )
-        print("Tensor method: ", deltas[-1])
+        # deltas[-1] = -self.layers[-1].activation_function.gradient(
+        #    self.layers[-1].weighted_sums, -y / self.layers[-1].activation
+        # )
+        # print("Tensor method: ", deltas[-1])
 
         # print("deltas 2: ", deltas[-1])
+
         # Softmax + Cross-Entropy Loss ??
         # deltas[-1] = y - self.layers[-1].activation
         # print(deltas[-1])
@@ -170,7 +182,7 @@ class NeuralNetwork:
         # ) - self.alpha * self.regularization(self.layers[-1].bias_weights)
 
     def train(self):
-        for i in range(100):
+        for i in range(self.epochs):
             print("Epoch: ", i)
             self.propagate_backward(self.x_train, self.y_train)
 

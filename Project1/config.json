@@ -1,11 +1,11 @@
 {
     "dataset": "dataset-j.p",
-    "regularization": "lr2",
+    "regularization": "lnor2",
     "regularization_weight": 0.001,
     "learning_rate": 0.0001,
-    "loss_function": "mean_squared",
+    "loss_function": "MSE",
     "input_dimension": 400,
-    "output_activation": "softmax",
+    "epochs": 400,
     "layers": [{
             "size": 100,
             "activation_function": "ReLU",
@@ -20,7 +20,7 @@
         },
         {
             "size": 4,
-            "activation_function": "Softmax",
+            "activation_function": "Sigmoid",
             "weight_range": "",
             "bias_range": ""
         }

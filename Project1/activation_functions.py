@@ -50,7 +50,6 @@ class Softmax(ActivationFunction):
         tensor1 = np.einsum("ij,ik->ijk", p, p)
         tensor2 = np.einsum("ij,jk->ijk", p, np.eye(n, n))
         dSoftmax = tensor2 - tensor1
-        print("dSoftmax: ", dSoftmax.shape)
         dz = np.einsum("ijk,ik->ij", dSoftmax, da)
         return dz
 
