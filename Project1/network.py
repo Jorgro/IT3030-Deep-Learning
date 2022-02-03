@@ -121,37 +121,12 @@ class NeuralNetwork:
             self.output_activation == "Softmax" and self.loss_function == "MSE"
         ):  # Very complex delta..
             deltas[-1] = -self.layers[-1].activation_function.gradient(
-                self.layers[-1].weighted_sums, -y / self.layers[-1].activation
+                self.layers[-1].weighted_sums, y - self.layers[-1].activation
             )
         else:  # Softmax + Cross Entropy Loss gives us a very simple delta!
             deltas[-1] = y - self.layers[-1].activation
 
-        # print(
-        #     self.layers[-1]
-        #     .activation_function.gradient(
-        #         self.layers[-1].weighted_sums, -y / self.layers[-1].activation
-        #     )
-        #     .shape
-        # )
-        # print((self.layers[-1].activation / y).shape)
-        # print(self.layers[-1].weighted_sums.shape)
-
-        # Cross entropy + random shit
-        # deltas[-1] = -self.layers[-1].activation_function.gradient(
-        #    self.layers[-1].weighted_sums, -y / self.layers[-1].activation
-        # )
-        # print("Tensor method: ", deltas[-1])
-
-        # print("deltas 2: ", deltas[-1])
-
-        # Softmax + Cross-Entropy Loss ??
-        # deltas[-1] = y - self.layers[-1].activation
-        # print(deltas[-1])
-        # print("Simplification method: ", deltas[-1])
-
         for i in range(len(self.layers) - 2, -1, -1):
-            # print("self.layers[i + 1].weights ", self.layers[i + 1].weights.shape)
-            # print("deltas[i + 1] ", deltas[i + 1].shape)
 
             deltas[i] = np.multiply(
                 self.layers[i].activation_function.df(self.layers[i].weighted_sums),
@@ -164,22 +139,12 @@ class NeuralNetwork:
             else:
                 prev_activation = self.layers[i - 1].activation.T
 
-            # print("deltas[i] ", deltas[i].shape)
-            # print("prev ", prev_activation.shape)
-
             self.layers[i].weights += self.lr * (
                 (deltas[i].T @ prev_activation.T)
             ) - self.alpha * self.regularization(self.layers[i].weights)
             self.layers[i].bias_weights += self.lr * (
                 np.sum(deltas[i], 0).reshape((self.layers[i].output_dim, 1))
             ) - self.alpha * self.regularization(self.layers[i].bias_weights)
-
-        # self.layers[-1].weights += self.lr * (
-        #     deltas[-1] @ self.layers[-2].activation.T
-        # ) - self.alpha * self.regularization(self.layers[-1].weights)
-        # self.layers[-1] += self.lr * (
-        #     np.sum(deltas[-1], 1).reshape((self.layers[-1].output_dim, 1))
-        # ) - self.alpha * self.regularization(self.layers[-1].bias_weights)
 
     def train(self):
         for i in range(self.epochs):

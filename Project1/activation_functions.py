@@ -34,6 +34,30 @@ class ReLU(ActivationFunction):
         return "ReLU"
 
 
+# CHANGE!
+class Linear(ActivationFunction):
+    def f(self, x):
+        return x
+
+    def df(self, _):
+        return 1
+
+    def __repr__(self):
+        return "Linear"
+
+
+# CHANGE!
+class Tanh(ActivationFunction):
+    def f(self, x):
+        return x * (x > 0)
+
+    def df(self, x):
+        return 1.0 * (x > 0)
+
+    def __repr__(self):
+        return "ReLU"
+
+
 class Softmax(ActivationFunction):
     def f(self, x):
         exp_max = np.exp(x - np.max(x, axis=1, keepdims=True))

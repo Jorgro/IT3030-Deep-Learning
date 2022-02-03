@@ -2,9 +2,8 @@ import json
 from network import NeuralNetwork
 
 # TODO:
-# - Add dynamic loss function
 # - Data generation
-# - Cross-entropy loss function
+# - liner and tanh activation functions
 
 if __name__ == "__main__":
     print("Loading config.")
