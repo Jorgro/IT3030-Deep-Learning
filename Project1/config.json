@@ -1,13 +1,13 @@
 {
     "dataset": "dataset-j.p",
-    "regularization": "lnor2",
+    "regularization": "lr2",
     "regularization_weight": 0.001,
-    "learning_rate": 0.0001,
-    "loss_function": "MSE",
+    "learning_rate": 0.011,
+    "loss_function": "CEE",
     "input_dimension": 400,
-    "epochs": 400,
+    "epochs": 500,
     "layers": [{
-            "size": 100,
+            "size": 70,
             "activation_function": "ReLU",
             "weight_range": "",
             "bias_range": ""
@@ -19,8 +19,14 @@
             "bias_range": ""
         },
         {
+            "size": 80,
+            "activation_function": "ReLU",
+            "weight_range": "",
+            "bias_range": ""
+        },
+        {
             "size": 4,
-            "activation_function": "Sigmoid",
+            "activation_function": "Softmax",
             "weight_range": "",
             "bias_range": ""
         }

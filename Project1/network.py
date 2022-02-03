@@ -109,25 +109,27 @@ class NeuralNetwork:
         self.propagate_forward(X)  # Each layer memorizes by itself
         m = y.shape[0]
         deltas = [[] for _ in range(len(self.layers))]
-        # print("deltas 1: ", deltas[-1])
-        # Sigmoid + Mean Squared:
 
         if self.output_activation != "Softmax" and self.loss_function == "MSE":
+            # Linearly independent output activation gives us a simplification of the Jacobian
             deltas[-1] = np.multiply(
-                self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
-                (y - self.layers[-1].activation),
+                self.layers[-1].activation_function.df(self.layers[-1].activation),
+                (y - self.layers[-1].activation),  # Derivative of MSE
             )
         elif (
             self.output_activation == "Softmax" and self.loss_function == "MSE"
-        ):  # Very complex delta..
-            deltas[-1] = -self.layers[-1].activation_function.gradient(
-                self.layers[-1].weighted_sums, y - self.layers[-1].activation
+        ):  # This jacobian is not fun :) Some tensor operations needed..
+            deltas[-1] = np.einsum(
+                "ijk,ik->ij",
+                self.layers[-1].activation_function.df(self.layers[-1].activation),
+                y - self.layers[-1].activation,
             )
-        else:  # Softmax + Cross Entropy Loss gives us a very simple delta!
+
+        else:  # Softmax + Cross Entropy Loss gives us a delta!
             deltas[-1] = y - self.layers[-1].activation
 
         for i in range(len(self.layers) - 2, -1, -1):
-
+            # Simple jacobian since our hidden layer activation functions are linearly independent
             deltas[i] = np.multiply(
                 self.layers[i].activation_function.df(self.layers[i].weighted_sums),
                 (deltas[i + 1] @ self.layers[i + 1].weights),
@@ -139,17 +141,19 @@ class NeuralNetwork:
             else:
                 prev_activation = self.layers[i - 1].activation.T
 
-            self.layers[i].weights += self.lr * (
+            # Update weights:
+            self.layers[i].weights += self.lr / m * (
                 (deltas[i].T @ prev_activation.T)
             ) - self.alpha * self.regularization(self.layers[i].weights)
-            self.layers[i].bias_weights += self.lr * (
+            self.layers[i].bias_weights += self.lr / m * (
                 np.sum(deltas[i], 0).reshape((self.layers[i].output_dim, 1))
             ) - self.alpha * self.regularization(self.layers[i].bias_weights)
 
     def train(self):
         for i in range(self.epochs):
             print("Epoch: ", i)
-            self.propagate_backward(self.x_train, self.y_train)
+            mini_batch = np.random.choice(self.x_train.shape[0], 200, replace=False)
+            self.propagate_backward(self.x_train[mini_batch], self.y_train[mini_batch])
 
         pred = self.propagate_forward(self.x_test)
 
@@ -163,7 +167,7 @@ class NeuralNetwork:
         # print("Pred: ", pred)
         # print("test: ", self.y_test)
 
-        if self.config["dataset"] == "dataset-j.p":
+        if self.config["dataset"] != "data_breast_cancer.p":
             k = np.argmax(pred, axis=1)
             p = np.argmax(self.y_test, axis=1)
             print(k)

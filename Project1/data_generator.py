@@ -155,15 +155,15 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    dg = DataGenerator([5, 5], [5, 5], [5, 5], [5, 5], [5, 5], 1000, 20, 0.01)
-    # dg.generate_datasets()
+    dg = DataGenerator([5, 10], [5, 10], [5, 10], [5, 10], [3, 7], 3000, 20, 0.001)
+    dg.generate_datasets()
 
-    with open("dataset.pickle", "rb") as handle:
+    """ with open("dataset.pickle", "rb") as handle:
         b = pickle.load(handle)
 
     img = b["x_train"][20]
     print(img.reshape((20, 20)))
-    print(b["y_train"][20])
+    print(b["y_train"][20]) """
 
     """ # dg = DataGenerator(1000, 0.01)
 

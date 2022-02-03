@@ -7,7 +7,7 @@ class ActivationFunction(metaclass=abc.ABCMeta):
     def f(self, x):
         pass
 
-    @staticmethod
+    @abc.abstractclassmethod
     def df(self, x):
         pass
 
@@ -64,18 +64,8 @@ class Softmax(ActivationFunction):
         return exp_max / np.sum(exp_max, axis=1, keepdims=True)
 
     def df(self, x):
-        x = x.reshape(-1, 1)
-        return np.diagflat(x) - np.dot(x, x.T)
-
-    def gradient(self, z, da):
-        # https://themaverickmeerkat.com/2019-10-23-Softmax/
-        m, n = z.shape
-        p = self.f(z)
-        tensor1 = np.einsum("ij,ik->ijk", p, p)
-        tensor2 = np.einsum("ij,jk->ijk", p, np.eye(n, n))
-        dSoftmax = tensor2 - tensor1
-        dz = np.einsum("ijk,ik->ij", dSoftmax, da)
-        return dz
+        _, n = x.shape
+        return np.einsum("ij,jk->ijk", x, np.eye(n, n)) - np.einsum("ij,ik->ijk", x, x)
 
     def __repr__(self):
         return "Softmax"

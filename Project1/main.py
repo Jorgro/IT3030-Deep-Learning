@@ -2,8 +2,9 @@ import json
 from network import NeuralNetwork
 
 # TODO:
-# - liner and tanh activation functions
-# -
+# - tanh activation functions
+# - minibatching
+
 
 if __name__ == "__main__":
     print("Loading config.")
