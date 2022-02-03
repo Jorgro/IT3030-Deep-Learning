@@ -2,9 +2,8 @@ import json
 from network import NeuralNetwork
 
 # TODO:
-# - tanh activation functions
-# - minibatching
-
+# - PREP FOR DEMO
+# - Read through delivery and make sure everything is there!!
 
 if __name__ == "__main__":
     print("Loading config.")

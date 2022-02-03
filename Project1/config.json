@@ -1,5 +1,5 @@
 {
-    "dataset": "dataset.pickle",
+    "dataset": "dataset-j.p",
     "regularization": "lr2",
     "regularization_weight": 0.001,
     "learning_rate": 0.1,
@@ -8,7 +8,7 @@
     "epochs": 1000,
     "layers": [{
             "size": 70,
-            "activation_function": "Sigmoid",
+            "activation_function": "ReLU",
             "weight_range": "",
             "bias_range": ""
         },

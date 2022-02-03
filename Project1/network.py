@@ -27,6 +27,11 @@ class NeuralNetwork:
 
         self.layers: List[Layer] = []
 
+        if self.loss_function == "MSE":
+            self.loss = lambda y, y_pred: y - y_pred
+        elif self.loss_function == "CEE":
+            self.loss = lambda y, y_pred: y / y_pred
+
         for layer in layers:
             act_func_str = layer["activation_function"]
             self.output_activation = act_func_str
@@ -114,23 +119,21 @@ class NeuralNetwork:
         m = y.shape[0]
         deltas = [[] for _ in range(len(self.layers))]
 
-        if self.output_activation != "Softmax" and self.loss_function == "MSE":
+        if self.output_activation != "Softmax":
             # Linearly independent output activation gives us a simplification of the Jacobian
             deltas[-1] = np.multiply(
                 self.layers[-1].activation_function.df(self.layers[-1].activation),
-                (y - self.layers[-1].activation),  # Derivative of MSE
+                self.loss(y, self.layers[-1].activation),  # Derivative of MSE
             )
-        elif (
-            self.output_activation == "Softmax" and self.loss_function == "MSE"
-        ):  # This jacobian is not fun :) Some tensor operations needed..
+        else:  # Softmax jacobian is not fun :) Some tensor operations needed..
             deltas[-1] = np.einsum(
                 "ijk,ik->ij",
                 self.layers[-1].activation_function.df(self.layers[-1].activation),
-                y - self.layers[-1].activation,
+                self.loss(y, self.layers[-1].activation),
             )
 
-        else:  # Softmax + Cross Entropy Loss gives us a delta!
-            deltas[-1] = y - self.layers[-1].activation
+        # Softmax + Cross Entropy Loss coulda been simplified with this
+        # deltas[-1] = y - self.layers[-1].activation
 
         for i in range(len(self.layers) - 2, -1, -1):
             # Simple jacobian since our hidden layer activation functions are linearly independent
