@@ -1,8 +1,8 @@
 {
-    "dataset": "dataset-j.p",
+    "dataset": "dataset.pickle",
     "regularization": "lr2",
     "regularization_weight": 0.001,
-    "learning_rate": 0.011,
+    "learning_rate": 0.8,
     "loss_function": "CEE",
     "input_dimension": 400,
     "epochs": 500,
