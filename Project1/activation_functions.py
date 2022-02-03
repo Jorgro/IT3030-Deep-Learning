@@ -49,10 +49,10 @@ class Linear(ActivationFunction):
 # CHANGE!
 class Tanh(ActivationFunction):
     def f(self, x):
-        return x * (x > 0)
+        return np.tanh(x)
 
     def df(self, x):
-        return 1.0 * (x > 0)
+        return 1 - self.f(x) ** 2
 
     def __repr__(self):
         return "ReLU"

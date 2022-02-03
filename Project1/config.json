@@ -2,25 +2,13 @@
     "dataset": "dataset.pickle",
     "regularization": "lr2",
     "regularization_weight": 0.001,
-    "learning_rate": 0.8,
+    "learning_rate": 0.1,
     "loss_function": "CEE",
     "input_dimension": 400,
-    "epochs": 500,
+    "epochs": 1000,
     "layers": [{
             "size": 70,
-            "activation_function": "ReLU",
-            "weight_range": "",
-            "bias_range": ""
-        },
-        {
-            "size": 50,
-            "activation_function": "ReLU",
-            "weight_range": "",
-            "bias_range": ""
-        },
-        {
-            "size": 80,
-            "activation_function": "ReLU",
+            "activation_function": "Sigmoid",
             "weight_range": "",
             "bias_range": ""
         },

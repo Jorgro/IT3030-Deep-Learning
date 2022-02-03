@@ -3,7 +3,7 @@ import numpy as np
 from layer import Layer
 import os
 import pickle
-from activation_functions import Sigmoid, ReLU, Softmax
+from activation_functions import Sigmoid, ReLU, Softmax, Tanh, Linear
 
 
 class NeuralNetwork:
@@ -34,6 +34,10 @@ class NeuralNetwork:
                 act_func = Softmax()
             elif act_func_str == "ReLU":
                 act_func = ReLU()
+            elif act_func_str == "Tanh":
+                act_func = Tanh()
+            elif act_func_str == "Linear":
+                act_func = Linear()
             else:
                 act_func = Sigmoid()
 
