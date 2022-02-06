@@ -5,7 +5,7 @@
     "learning_rate": 0.7,
     "loss_function": "MSE",
     "input_dimension": 400,
-    "epochs": 500,
+    "epochs": 2,
     "layers": [{
             "size": 70,
             "activation_function": "ReLU",

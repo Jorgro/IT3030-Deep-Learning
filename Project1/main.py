@@ -6,15 +6,13 @@ from network import NeuralNetwork
 # - Read through delivery and make sure everything is there!
 # - Double check Cross entropy loss function
 # - Verbose flag
-
+# - Validate and test to plot
 if __name__ == "__main__":
     print("Loading config.")
-    with open("Project1/configs/sigmoid_mse_reg.json") as f:
+    with open("Project1/config.json") as f:
         config = json.load(f)
-    print(config)
-    print("Running main application")
     nn = NeuralNetwork(config)
-    print(nn)
+    print("Loading dataset")
     nn.load_data()
+    print("Training network")
     nn.train()
-    # print(nn)

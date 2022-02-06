@@ -132,8 +132,13 @@ class NeuralNetwork:
         return X
 
     def propagate_backward(self, X: np.ndarray, y: np.ndarray):
-
-        self.propagate_forward(X)  # Each layer memorizes by itself
+        if VERBOSE:
+            print("INPUT: ", X)
+        output = self.propagate_forward(X)  # Each layer memorizes by itself
+        if VERBOSE:
+            print("OUTPUT: ", output)
+            print("TARGET VALUES: ", y)
+            print("ERROR: ", self.loss(y, output))
         m = y.shape[0]
         deltas = [[] for _ in range(len(self.layers))]
 
