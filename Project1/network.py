@@ -110,6 +110,10 @@ class NeuralNetwork:
                 np.array(data["x_train"]),
                 np.array(data["y_train"]),
             )
+            self.x_val, self.y_val = (
+                np.array(data["x_val"]),
+                np.array(data["y_val"]),
+            )
             self.x_test, self.y_test = (
                 np.array(data["x_test"]),
                 np.array(data["y_test"]),
@@ -185,44 +189,28 @@ class NeuralNetwork:
             print(images)
             show_images(self.x_train[images])
 
-        losses = []
+        train_losses = []
+        val_losses = []
         epochs = np.linspace(1, self.epochs, self.epochs)
         for i in range(self.epochs):
             print("Epoch: ", i)
             mini_batch = np.random.choice(self.x_train.shape[0], 200, replace=False)
             self.propagate_backward(self.x_train[mini_batch], self.y_train[mini_batch])
-            losses.append(self.loss(self.y_test, self.propagate_forward(self.x_test)))
+            val_losses.append(self.loss(self.y_val, self.propagate_forward(self.x_val)))
+            train_losses.append(
+                self.loss(self.y_train, self.propagate_forward(self.x_train))
+            )
 
         pred = self.propagate_forward(self.x_test)
-
-        n = len(self.y_test)
-        correct = 0
-        # pred = self.propagate_forward(self.x_test)[0]
-        pred = self.propagate_forward(self.x_test)
-
-        # pred = np.round(pred, 3)
-
-        # print("Pred: ", pred)
-        # print("test: ", self.y_test)
-
         if self.config["dataset"] != "data_breast_cancer.p":
             k = np.argmax(pred, axis=1)
             p = np.argmax(self.y_test, axis=1)
-            print(k)
-            print(p)
-            print("Accuracy: ", np.sum(k == p) / k.shape[0])
-        else:
-            for i in range(n):
-                # Predict by running forward pass through the neural network
-                # Sanity check of the prediction
-                assert 0 <= pred[i] <= 1, "The prediction needs to be in [0, 1] range."
-                # Check if right class is predicted
-                correct += self.y_test[i][0] == round(float(pred[i][0]))
-            print("Accuracy: ", round(correct / n, 3))
+            print("Test accuracy: ", np.sum(k == p) / k.shape[0])
 
-        ax = sns.lineplot(epochs, losses)
+        ax = sns.lineplot(x=epochs, y=train_losses)
+        ax = sns.lineplot(x=epochs, y=val_losses, ax=ax)
         ax.set(xlabel="Epoch", ylabel="Error")
-        ax.legend([self.loss_function])
+        ax.legend([f"{self.loss_function}: Train loss", f"{self.loss_function}: Val loss"])
         plt.show()
 
     def __repr__(self):

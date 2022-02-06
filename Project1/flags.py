@@ -1,2 +1,2 @@
-VERBOSE = True
+VERBOSE = False
 SHOW_IMAGES = False

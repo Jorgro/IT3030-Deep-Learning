@@ -29,8 +29,8 @@ class DataGenerator:
         image_size: int,
         noise: float,
         train_size: float = 0.70,
-        test_size: float = 0.20,
-        val_size: float = 0.10,
+        val_size: float = 0.20,
+        test_size: float = 0.10,
     ):
         self.rec_width_range = rec_width_range
         self.rec_height_range = rec_height_range
@@ -42,11 +42,11 @@ class DataGenerator:
         self.nr_images = nr_images
         self.noise = noise
 
-        self.paths = ["train", "test", "val"]
+        self.paths = ["train", "val", "test"]
         self.sizes = [
             round(train_size * nr_images),
-            round(test_size * nr_images),
             round(val_size * nr_images),
+            round(test_size * nr_images),
         ]
 
         self.dataset_file_name = "dataset.p"
