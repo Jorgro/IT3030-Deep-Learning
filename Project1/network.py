@@ -4,6 +4,18 @@ from layer import Layer
 import os
 import pickle
 from activation_functions import Sigmoid, ReLU, Softmax, Tanh, Linear
+import seaborn as sns
+import matplotlib.pyplot as plt
+from flags import VERBOSE, SHOW_IMAGES
+
+
+def show_images(images):
+    _, axarr = plt.subplots(2, 5)
+    n = int(images.shape[1] ** (1 / 2))
+    for i in range(2):
+        for j in range(5):
+            axarr[i, j].imshow(images[i * 5 + j].reshape(n, n))
+    plt.show()
 
 
 class NeuralNetwork:
@@ -28,9 +40,15 @@ class NeuralNetwork:
         self.layers: List[Layer] = []
 
         if self.loss_function == "MSE":
-            self.loss = lambda y, y_pred: y - y_pred
+            self.loss_derivative = (
+                lambda y, y_pred: y - y_pred
+            )  # Mean squared derivative
+            self.loss = lambda y, y_pred: 1 / y.shape[0] * np.sum((y - y_pred) ** 2)
         elif self.loss_function == "CEE":
-            self.loss = lambda y, y_pred: y / y_pred
+            self.loss_derivative = (
+                lambda y, y_pred: y / y_pred
+            )  # Cross entropy derivative
+            self.loss = lambda y, y_pred: -1 / y.shape[0] * np.sum(y * np.log(y_pred))
 
         for layer in layers:
             act_func_str = layer["activation_function"]
@@ -120,23 +138,23 @@ class NeuralNetwork:
         deltas = [[] for _ in range(len(self.layers))]
 
         if self.output_activation != "Softmax":
-            # Linearly independent output activation gives us a simplification of the Jacobian
+            # Linearly independent output activation gives a gradient matrix (examples x gradient vector)
             deltas[-1] = np.multiply(
-                self.layers[-1].activation_function.df(self.layers[-1].activation),
-                self.loss(y, self.layers[-1].activation),  # Derivative of MSE
+                self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
+                self.loss_derivative(y, self.layers[-1].activation),
             )
-        else:  # Softmax jacobian is not fun :) Some tensor operations needed..
+        else:  # Softmax jacobian is a tensor (when batching since gradient matrice x examples).
             deltas[-1] = np.einsum(
                 "ijk,ik->ij",
-                self.layers[-1].activation_function.df(self.layers[-1].activation),
-                self.loss(y, self.layers[-1].activation),
+                self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
+                self.loss_derivative(y, self.layers[-1].activation),
             )
 
         # Softmax + Cross Entropy Loss coulda been simplified with this
         # deltas[-1] = y - self.layers[-1].activation
 
         for i in range(len(self.layers) - 2, -1, -1):
-            # Simple jacobian since our hidden layer activation functions are linearly independent
+            # Simple jacobian matrices (gradient vectors x examples) since our hidden layer activation functions are linearly independent
             deltas[i] = np.multiply(
                 self.layers[i].activation_function.df(self.layers[i].weighted_sums),
                 (deltas[i + 1] @ self.layers[i + 1].weights),
@@ -148,7 +166,7 @@ class NeuralNetwork:
             else:
                 prev_activation = self.layers[i - 1].activation.T
 
-            # Update weights:
+            # Update weights
             self.layers[i].weights += self.lr / m * (
                 (deltas[i].T @ prev_activation.T)
             ) - self.alpha * self.regularization(self.layers[i].weights)
@@ -157,10 +175,18 @@ class NeuralNetwork:
             ) - self.alpha * self.regularization(self.layers[i].bias_weights)
 
     def train(self):
+        if SHOW_IMAGES:
+            images = np.random.choice(self.x_train.shape[0], 10, replace=False)
+            print(images)
+            show_images(self.x_train[images])
+
+        losses = []
+        epochs = np.linspace(1, self.epochs, self.epochs)
         for i in range(self.epochs):
             print("Epoch: ", i)
             mini_batch = np.random.choice(self.x_train.shape[0], 200, replace=False)
             self.propagate_backward(self.x_train[mini_batch], self.y_train[mini_batch])
+            losses.append(self.loss(self.y_test, self.propagate_forward(self.x_test)))
 
         pred = self.propagate_forward(self.x_test)
 
@@ -188,6 +214,11 @@ class NeuralNetwork:
                 # Check if right class is predicted
                 correct += self.y_test[i][0] == round(float(pred[i][0]))
             print("Accuracy: ", round(correct / n, 3))
+
+        ax = sns.lineplot(epochs, losses)
+        ax.set(xlabel="Epoch", ylabel="Error")
+        ax.legend([self.loss_function])
+        plt.show()
 
     def __repr__(self):
         representation = "NeuralNetwork("

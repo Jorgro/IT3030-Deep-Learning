@@ -1,5 +1,6 @@
 from activation_functions import ActivationFunction
 import numpy as np
+from flags import VERBOSE
 
 
 class Layer:

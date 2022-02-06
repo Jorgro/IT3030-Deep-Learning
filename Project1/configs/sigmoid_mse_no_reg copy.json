@@ -1,0 +1,22 @@
+{
+    "dataset": "dataset.pickle",
+    "regularization": "lr22",
+    "regularization_weight": 0.01,
+    "learning_rate": 0.7,
+    "loss_function": "MSE",
+    "input_dimension": 400,
+    "epochs": 2000,
+    "layers": [{
+            "size": 70,
+            "activation_function": "ReLU",
+            "weight_range": "glorot",
+            "bias_range": "glorot"
+        },
+        {
+            "size": 4,
+            "activation_function": "Sigmoid",
+            "weight_range": "glorot",
+            "bias_range": "glorot"
+        }
+    ]
+}

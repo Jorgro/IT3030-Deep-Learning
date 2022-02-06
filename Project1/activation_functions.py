@@ -65,6 +65,7 @@ class Softmax(ActivationFunction):
 
     def df(self, x):
         _, n = x.shape
+        x = self.f(x)
         return np.einsum("ij,jk->ijk", x, np.eye(n, n)) - np.einsum("ij,ik->ijk", x, x)
 
     def __repr__(self):

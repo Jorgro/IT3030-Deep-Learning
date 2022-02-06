@@ -150,49 +150,10 @@ class DataGenerator:
     @staticmethod
     def generate_noise(img: np.array, p: float):
         probs = np.random.random(img.shape)
-        img[probs < p] = 0
+        img[probs < p] = 1
         return img.flatten()
 
 
 if __name__ == "__main__":
-    dg = DataGenerator([5, 10], [5, 10], [5, 10], [5, 10], [3, 7], 3000, 20, 0.001)
+    dg = DataGenerator([5, 10], [5, 10], [5, 10], [5, 10], [3, 7], 3000, 20, 0.01)
     dg.generate_datasets()
-
-    """ with open("dataset.pickle", "rb") as handle:
-        b = pickle.load(handle)
-
-    img = b["x_train"][20]
-    print(img.reshape((20, 20)))
-    print(b["y_train"][20]) """
-
-    """ # dg = DataGenerator(1000, 0.01)
-
-    img1 = np.zeros((20, 20))
-    img1 = DataGenerator.generate_vertical_bars(img1, [5, 5])
-
-    img2 = np.zeros((20, 20))
-    img2 = DataGenerator.generate_horizontal_bars(img2, [5, 5])
-
-    img3 = np.zeros((20, 20))
-    img3 = DataGenerator.generate_cross(img3, [3, 3])
-
-    img4 = np.zeros((20, 20))
-    img4 = DataGenerator.generate_rectangle(img4, [4, 4], [5, 5])
-
-    d = dict()
-    d["x_train"] = np.array([img1, img2, img3, img4])
-    d["y_train"] = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-
-    with open("dataset.pickle", "wb") as handle:
-        pickle.dump(d, handle)
-
-    with open("dataset.pickle", "rb") as handle:
-        b = pickle.load(handle)
-
-    img = b["x_train"][0]
-
-    print(img)
-    cv2.imwrite("test.png", 255 * img)
-
-    # dg.generate_datasets() """
-
