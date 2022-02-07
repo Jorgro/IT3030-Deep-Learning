@@ -3,12 +3,12 @@
     "regularization": "lr2",
     "regularization_weight": 0.001,
     "learning_rate": 0.7,
-    "loss_function": "MSE",
+    "loss_function": "CEE",
     "input_dimension": 400,
     "epochs": 2000,
     "layers": [{
             "size": 70,
-            "activation_function": "ReLU",
+            "activation_function": "Tanh",
             "weight_range": "glorot",
             "bias_range": "glorot"
         },

@@ -1,11 +1,5 @@
-from enum import Enum
-import os
-import shutil
 from typing import List
-from skimage.draw import random_shapes
-from skimage.io import imsave
 import numpy as np
-import cv2
 import random
 
 import pickle
@@ -49,12 +43,12 @@ class DataGenerator:
             round(test_size * nr_images),
         ]
 
-        self.dataset_file_name = "dataset.p"
+        self.dataset_file_name = "dataset.pickle"
 
     def generate_datasets(self):
 
         # Generate the datasets
-        datasets = {"size: ": self.image_size}  # For being able to convert to 2D again
+        datasets = {"size: ": self.image_size}
 
         for path, size in zip(self.paths, self.sizes):
             data_x = []
@@ -119,6 +113,7 @@ class DataGenerator:
     def generate_cross(img, length_range: List[int]):
         length = random.randint(length_range[0], length_range[1])
         n = img.shape[0]
+
         center = (
             random.randint(length, n - length - 1),
             random.randint(length, n - length - 1),
@@ -155,5 +150,5 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    dg = DataGenerator([5, 10], [5, 10], [5, 10], [5, 10], [3, 7], 3000, 20, 0.01)
+    dg = DataGenerator([10, 15], [10, 15], [10, 15], [10, 15], [6, 8], 3000, 20, 0.01)
     dg.generate_datasets()

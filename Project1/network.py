@@ -3,7 +3,7 @@ import numpy as np
 from layer import Layer
 import os
 import pickle
-from activation_functions import Sigmoid, ReLU, Softmax, Tanh, Linear
+from activation_functions import Sigmoid, ReLU, Softmax, Tanh, Linear, LeakyReLU
 import seaborn as sns
 import matplotlib.pyplot as plt
 from flags import VERBOSE, SHOW_IMAGES
@@ -21,6 +21,7 @@ def show_images(images):
 class NeuralNetwork:
     def __init__(self, config: dict):
         self.config = config
+        self.mini_batch_size = config["batch_size"]
         self.dataset_path = os.path.join(os.getcwd(), config["dataset"])
         regularization = config["regularization"]
         self.alpha = config["regularization_weight"]
@@ -45,18 +46,24 @@ class NeuralNetwork:
             )  # Mean squared derivative
             self.loss = lambda y, y_pred: 1 / y.shape[0] * np.sum((y - y_pred) ** 2)
         elif self.loss_function == "CEE":
-            self.loss_derivative = (
-                lambda y, y_pred: y / y_pred
+            self.loss_derivative = lambda y, y_pred: y / (
+                y_pred + 1e-6
             )  # Cross entropy derivative
-            self.loss = lambda y, y_pred: -1 / y.shape[0] * np.sum(y * np.log(y_pred))
+            self.loss = (
+                lambda y, y_pred: -1 / y.shape[0] * np.sum(y * np.log(y_pred + 1e-5))
+            )
 
-        for layer in layers:
+        self.output_activation = config["type"]
+        print("Output: ", self.output_activation)
+        if self.output_activation == "Softmax":
+            self.softmax = Softmax()
+
+        for i, layer in enumerate(layers):
             act_func_str = layer["activation_function"]
-            self.output_activation = act_func_str
-            if act_func_str == "Softmax":
-                act_func = Softmax()
-            elif act_func_str == "ReLU":
+            if act_func_str == "ReLU":
                 act_func = ReLU()
+            elif act_func_str == "LeakyReLU":
+                act_func = LeakyReLU()
             elif act_func_str == "Tanh":
                 act_func = Tanh()
             elif act_func_str == "Linear":
@@ -76,9 +83,16 @@ class NeuralNetwork:
             else:
                 lr = self.lr
 
+            no_bias = len(layers) - 1 == i
             self.layers.append(
                 Layer(
-                    input_dimension, layer["size"], act_func, weights, bias_weights, lr
+                    input_dimension,
+                    layer["size"],
+                    act_func,
+                    weights,
+                    bias_weights,
+                    lr,
+                    no_bias,
                 )
             )
             input_dimension = layer["size"]
@@ -122,7 +136,7 @@ class NeuralNetwork:
                 self.y_train = self.y_train.reshape((self.y_train.shape[0], 1))
                 self.y_test = self.y_test.reshape((self.y_test.shape[0], 1))
 
-    def propagate_forward(self, X: np.ndarray) -> np.ndarray:
+    def forward_pass(self, X: np.ndarray) -> np.ndarray:
         """Propagate an input forward to receive activation in NN.
 
         Args:
@@ -133,12 +147,14 @@ class NeuralNetwork:
         """
         for layer in self.layers:
             X = layer.propagate(X)
+        if self.output_activation == "Softmax":
+            return self.softmax.f(X)
         return X
 
-    def propagate_backward(self, X: np.ndarray, y: np.ndarray):
+    def backward_pass(self, X: np.ndarray, y: np.ndarray):
         if VERBOSE:
             print("INPUT: ", X)
-        output = self.propagate_forward(X)  # Each layer memorizes by itself
+        output = self.forward_pass(X)  # Each layer memorizes by itself
         if VERBOSE:
             print("OUTPUT: ", output)
             print("TARGET VALUES: ", y)
@@ -155,15 +171,15 @@ class NeuralNetwork:
         else:  # Softmax jacobian is a tensor (when batching since gradient matrice x examples).
             deltas[-1] = np.einsum(
                 "ijk,ik->ij",
-                self.layers[-1].activation_function.df(self.layers[-1].weighted_sums),
-                self.loss_derivative(y, self.layers[-1].activation),
-            )
+                self.softmax.df(self.layers[-1].activation),
+                self.loss_derivative(y, self.softmax.f(self.layers[-1].activation)),
+            )  # J_L/Z = J_L/S * J_S_Z (roughly.. since tensors)
 
-        # Softmax + Cross Entropy Loss coulda been simplified with this
-        # deltas[-1] = y - self.layers[-1].activation
+        # Softmax + Cross Entropy Loss coulda been simplified with this, but not done for being explicit.
+        #deltas[-1] = y - self.softmax.f(self.layers[-1].activation)
 
         for i in range(len(self.layers) - 2, -1, -1):
-            # Simple jacobian matrices (gradient vectors x examples) since our hidden layer activation functions are linearly independent
+            # Simple jacobian vectors since our hidden layer activation functions are linearly independent
             deltas[i] = np.multiply(
                 self.layers[i].activation_function.df(self.layers[i].weighted_sums),
                 (deltas[i + 1] @ self.layers[i + 1].weights),
@@ -175,42 +191,53 @@ class NeuralNetwork:
             else:
                 prev_activation = self.layers[i - 1].activation.T
 
+            # print(f"Deltas {i}: ", deltas[i])
+            # print(f"Prev activation {i}: ", prev_activation)
+
             # Update weights
-            self.layers[i].weights += self.lr / m * (
+            self.layers[i].weights += self.layers[i].lr / m * (
                 (deltas[i].T @ prev_activation.T)
             ) - self.alpha * self.regularization(self.layers[i].weights)
-            self.layers[i].bias_weights += self.lr / m * (
+            self.layers[i].bias_weights += self.layers[i].lr / m * (
                 np.sum(deltas[i], 0).reshape((self.layers[i].output_dim, 1))
             ) - self.alpha * self.regularization(self.layers[i].bias_weights)
 
     def train(self):
         if SHOW_IMAGES:
             images = np.random.choice(self.x_train.shape[0], 10, replace=False)
-            print(images)
             show_images(self.x_train[images])
 
         train_losses = []
         val_losses = []
         epochs = np.linspace(1, self.epochs, self.epochs)
         for i in range(self.epochs):
-            print("Epoch: ", i)
-            mini_batch = np.random.choice(self.x_train.shape[0], 200, replace=False)
-            self.propagate_backward(self.x_train[mini_batch], self.y_train[mini_batch])
-            val_losses.append(self.loss(self.y_val, self.propagate_forward(self.x_val)))
+            print("Epoch: ", i + 1)
+            mini_batch = np.random.choice(
+                self.x_train.shape[0], self.mini_batch_size, replace=False
+            )
+            self.backward_pass(self.x_train[mini_batch], self.y_train[mini_batch])
+            val_losses.append(self.loss(self.y_val, self.forward_pass(self.x_val)))
             train_losses.append(
-                self.loss(self.y_train, self.propagate_forward(self.x_train))
+                self.loss(self.y_train, self.forward_pass(self.x_train))
             )
 
-        pred = self.propagate_forward(self.x_test)
+        pred = self.forward_pass(self.x_test)
+        for l in self.layers:
+            print("Layer activation: ", l.activation)
         if self.config["dataset"] != "data_breast_cancer.p":
             k = np.argmax(pred, axis=1)
             p = np.argmax(self.y_test, axis=1)
+            print(k)
+            print(p)
             print("Test accuracy: ", np.sum(k == p) / k.shape[0])
+            print("Test cost: ", self.loss(self.y_test, pred))
 
         ax = sns.lineplot(x=epochs, y=train_losses)
         ax = sns.lineplot(x=epochs, y=val_losses, ax=ax)
         ax.set(xlabel="Epoch", ylabel="Error")
-        ax.legend([f"{self.loss_function}: Train loss", f"{self.loss_function}: Val loss"])
+        ax.legend(
+            [f"{self.loss_function}: Train loss", f"{self.loss_function}: Val loss"]
+        )
         plt.show()
 
     def __repr__(self):

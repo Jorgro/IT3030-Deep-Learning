@@ -34,6 +34,17 @@ class ReLU(ActivationFunction):
         return "ReLU"
 
 
+class LeakyReLU(ActivationFunction):
+    def f(self, x):
+        return np.where(x > 0, x, x * 0.1)
+
+    def df(self, x):
+        return np.where(x > 0, 1.0, 0.1)
+
+    def __repr__(self):
+        return "LeakyReLU"
+
+
 # CHANGE!
 class Linear(ActivationFunction):
     def f(self, x):
@@ -55,7 +66,7 @@ class Tanh(ActivationFunction):
         return 1 - self.f(x) ** 2
 
     def __repr__(self):
-        return "ReLU"
+        return "Tanh"
 
 
 class Softmax(ActivationFunction):
@@ -73,9 +84,9 @@ class Softmax(ActivationFunction):
 
 
 if __name__ == "__main__":
-    relu = ReLU()
+    relu = LeakyReLU()
     print(relu.df(-0.01))
-    arr = np.array([[2, 3, 6, 8], [3, 5, 4, 10]])
+    """  arr = np.array([[2, 3, 6, 8], [3, 5, 4, 10]])
     softmax = Softmax()
     print(softmax.df(np.array([2, 3])))
     print(softmax.f(np.array([[2, 3, 6, 8], [3, 5, 4, 10]])))
@@ -90,5 +101,5 @@ if __name__ == "__main__":
     print("c: ", c)
     print("c @ s': ", c @ softmax.df(s))
     print("s - y: ", s - y)
-    print("Grad: ", c @ softmax.gradient(s))
+    print("Grad: ", c @ softmax.gradient(s)) """
 
