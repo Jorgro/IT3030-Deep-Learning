@@ -150,5 +150,5 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    dg = DataGenerator([10, 15], [10, 15], [10, 15], [10, 15], [6, 8], 3000, 20, 0.01)
+    dg = DataGenerator([8, 8], [8, 8], [8, 8], [8, 8], [6, 6], 5000, 16, 0.01)
     dg.generate_datasets()

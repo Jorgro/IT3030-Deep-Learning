@@ -46,8 +46,8 @@ class NeuralNetwork:
             )  # Mean squared derivative
             self.loss = lambda y, y_pred: 1 / y.shape[0] * np.sum((y - y_pred) ** 2)
         elif self.loss_function == "CEE":
-            self.loss_derivative = lambda y, y_pred: y / (
-                y_pred + 1e-6
+            self.loss_derivative = lambda y, y_pred: np.where(
+                y_pred != 0, -y / y_pred, 0
             )  # Cross entropy derivative
             self.loss = (
                 lambda y, y_pred: -1 / y.shape[0] * np.sum(y * np.log(y_pred + 1e-5))
@@ -136,6 +136,67 @@ class NeuralNetwork:
                 self.y_train = self.y_train.reshape((self.y_train.shape[0], 1))
                 self.y_test = self.y_test.reshape((self.y_test.shape[0], 1))
 
+    def forward_pass_individual(self, x):
+        o = x
+        for l in self.layers:
+            o = l.forward_pass(o)
+
+        if self.output_activation == "Softmax":
+            return self.softmax.f(o)
+        return o
+
+    def backward_pass_individual(self, Jlz):
+        jlz = Jlz
+        for i in range(len(self.layers) - 1, -1, -1):
+            # Go backwards through the network and update weights
+            jlz = self.layers[i].backward_pass(jlz)
+
+    def train_individual(self):
+        if SHOW_IMAGES:
+            images = np.random.choice(self.x_train.shape[0], 10, replace=False)
+            show_images(self.x_train[images])
+
+        train_losses = []
+        val_losses = []
+        epochs = np.linspace(1, self.epochs, self.epochs)
+        for i in range(self.epochs):
+            print("Epoch: ", i + 1)
+
+
+            for x, y in zip(self.x_train, self.y_train):
+                y_pred = self.forward_pass_individual(x)
+                Jlz = self.loss_derivative()
+
+                if self.output_activation == "Softmax":
+                    Jsz = self.softmax.df(y_pred)
+                    Jlz = Jlz @ Jsz
+                self.backward_pass_individual(Jlz)
+                for
+
+            val_losses.append(self.loss(self.y_val, self.forward_pass(self.x_val)))
+            train_losses.append(
+                self.loss(self.y_train, self.forward_pass(self.x_train))
+            )
+
+        pred = self.forward_pass_individual(self.x_test)
+        for l in self.layers:
+            print("Layer activation: ", l.activation)
+        if self.config["dataset"] != "data_breast_cancer.p":
+            k = np.argmax(pred, axis=1)
+            p = np.argmax(self.y_test, axis=1)
+            print(k)
+            print(p)
+            print("Test accuracy: ", np.sum(k == p) / k.shape[0])
+            print("Test cost: ", self.loss(self.y_test, pred))
+
+        ax = sns.lineplot(x=epochs, y=train_losses)
+        ax = sns.lineplot(x=epochs, y=val_losses, ax=ax)
+        ax.set(xlabel="Epoch", ylabel="Error")
+        ax.legend(
+            [f"{self.loss_function}: Train loss", f"{self.loss_function}: Val loss"]
+        )
+        plt.show()
+
     def forward_pass(self, X: np.ndarray) -> np.ndarray:
         """Propagate an input forward to receive activation in NN.
 
@@ -176,7 +237,7 @@ class NeuralNetwork:
             )  # J_L/Z = J_L/S * J_S_Z (roughly.. since tensors)
 
         # Softmax + Cross Entropy Loss coulda been simplified with this, but not done for being explicit.
-        #deltas[-1] = y - self.softmax.f(self.layers[-1].activation)
+        # deltas[-1] = y - self.softmax.f(self.layers[-1].activation)
 
         for i in range(len(self.layers) - 2, -1, -1):
             # Simple jacobian vectors since our hidden layer activation functions are linearly independent

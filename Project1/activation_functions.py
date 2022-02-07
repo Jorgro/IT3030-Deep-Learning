@@ -83,6 +83,22 @@ class Softmax(ActivationFunction):
         return "Softmax"
 
 
+class MSE:
+    def f(self, y, y_true):
+        pass
+
+    def df(self, y, y_true):
+        pass
+
+
+class CEE:
+    def f(self, y, y_true):
+        pass
+
+    def df(self, y, y_true):
+        pass
+
+
 if __name__ == "__main__":
     relu = LeakyReLU()
     print(relu.df(-0.01))

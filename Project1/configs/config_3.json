@@ -4,40 +4,49 @@
     "regularization_weight": 0.001,
     "learning_rate": 1.0,
     "batch_size": 800,
-    "loss_function": "CEE",
-    "input_dimension": 400,
-    "epochs": 1500,
-    "type": "Softmax",
+    "loss_function": "MSE",
+    "input_dimension": 256,
+    "epochs": 1000,
+    "type": "",
     "layers": [{
-            "size": 30,
+            "size": 150,
             "activation_function": "ReLU",
+            "learning_rate": 1.0,
             "weight_range": "glorot",
             "bias_range": "glorot"
         },
         {
-            "size": 30,
+            "size": 100,
             "activation_function": "ReLU",
+            "learning_rate": 0.2,
             "weight_range": "glorot",
             "bias_range": "glorot"
         },
         {
-            "size": 30,
+            "size": 50,
             "activation_function": "ReLU",
             "weight_range": "glorot",
-            "learning_rate": 0.8,
+            "learning_rate": 0.1,
             "bias_range": "glorot"
         },
         {
-            "size": 15,
+            "size": 25,
             "activation_function": "ReLU",
-            "learning_rate": 0.6,
+            "learning_rate": 0.1,
+            "weight_range": "glorot",
+            "bias_range": "glorot"
+        },
+        {
+            "size": 20,
+            "activation_function": "ReLU",
+            "learning_rate": 0.07,
             "weight_range": "glorot",
             "bias_range": "glorot"
         },
         {
             "size": 4,
-            "activation_function": "ReLU",
-            "learning_rate": 0.2,
+            "activation_function": "Sigmoid",
+            "learning_rate": 0.03,
             "weight_range": "",
             "bias_range": ""
         }
