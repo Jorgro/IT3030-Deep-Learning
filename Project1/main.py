@@ -6,7 +6,7 @@ from network import NeuralNetwork
 
 if __name__ == "__main__":
     print("Loading config.")
-    with open("Project1/configs/config_2.json") as f:
+    with open("Project1/configs/config_3.json") as f:
         config = json.load(f)
     nn = NeuralNetwork(config)
     print("Loading dataset")

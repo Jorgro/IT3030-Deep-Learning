@@ -2,13 +2,19 @@
     "dataset": "dataset.pickle",
     "regularization": "lr2",
     "regularization_weight": 0.001,
-    "learning_rate": 0.01,
+    "learning_rate": 0.1,
     "batch_size": 800,
     "loss_function": "CEE",
     "input_dimension": 400,
     "epochs": 1500,
     "type": "Softmax",
     "layers": [{
+            "size": 30,
+            "activation_function": "ReLU",
+            "weight_range": "glorot",
+            "bias_range": "glorot"
+        },
+        {
             "size": 30,
             "activation_function": "ReLU",
             "weight_range": "glorot",
