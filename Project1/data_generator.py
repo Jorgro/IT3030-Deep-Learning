@@ -47,6 +47,11 @@ class DataGenerator:
 
         self.dataset_file_name = "dataset.pickle"
 
+    @staticmethod
+    def get_2d_img(img):
+        n = int(img.shape[0] ** (1 / 2))
+        return img.reshape((n, n))
+
     def generate_datasets(self):
 
         # Generate the datasets
@@ -76,8 +81,7 @@ class DataGenerator:
                 )
                 cro = np.zeros((self.image_size, self.image_size))
                 cro = DataGenerator.generate_noise(
-                    DataGenerator.generate_cross(cro, self.cro_length_range), self.noise
-                )
+                    DataGenerator.generate_cross(cro, self.cro_length_range), self.noise)
                 data_x.append(rec.flatten())
                 data_x.append(ver.flatten())
                 data_x.append(hor.flatten())
@@ -153,10 +157,9 @@ class DataGenerator:
     @staticmethod
     def show_images(images):
         _, axarr = plt.subplots(2, 5)
-        n = int(images.shape[1] ** (1 / 2))
         for i in range(2):
             for j in range(5):
-                axarr[i, j].imshow(images[i * 5 + j].reshape(n, n))
+                axarr[i, j].imshow(DataGenerator.get_2d_img(images[i * 5 + j]))
         plt.show()
 
 
