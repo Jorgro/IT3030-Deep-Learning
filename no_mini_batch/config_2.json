@@ -11,7 +11,7 @@
     "layers": [{
         "size": 4,
         "activation_function": "Sigmoid",
-        "weight_range": [-0.5, 0.5],
-        "bias_range": [-0.5, 0.5]
+        "weight_range": "glorot",
+        "bias_range": "glorot"
     }]
 }

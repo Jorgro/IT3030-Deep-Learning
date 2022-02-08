@@ -11,20 +11,20 @@
     "layers": [{
             "size": 30,
             "activation_function": "ReLU",
-            "weight_range": "glorot",
-            "bias_range": "glorot"
+            "weight_range": [-0.5, 0.5],
+            "bias_range": [-0.5, 0.5]
         },
         {
             "size": 30,
             "activation_function": "ReLU",
-            "weight_range": "glorot",
-            "bias_range": "glorot"
+            "weight_range": [-0.5, 0.5],
+            "bias_range": [-0.5, 0.5]
         },
         {
             "size": 4,
             "activation_function": "ReLU",
-            "weight_range": "",
-            "bias_range": ""
+            "weight_range": [-0.5, 0.5],
+            "bias_range": [-0.5, 0.5]
         }
     ]
 }

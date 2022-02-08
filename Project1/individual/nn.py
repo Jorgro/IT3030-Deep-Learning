@@ -81,15 +81,18 @@ class NeuralNetwork:
             input_dimension = layer["size"]
 
     @staticmethod
-    def get_range(method, in_dim, out_dim) -> np.ndarray:
+    def get_range(method, in_dim, out_dim, one_dim=False) -> np.ndarray:
         if method == "glorot":
             mean = 0
             variance = 2.0 / (in_dim + out_dim)
-            return np.random.normal(mean, variance, (in_dim, out_dim))
+            v =  np.random.normal(mean, variance, (in_dim, out_dim))
         elif isinstance(method, list):
-            return np.random.uniform(method[0], method[1], (in_dim, out_dim))
+            v =  np.random.uniform(method[0], method[1], (in_dim, out_dim))
         else:
-            return np.random.uniform(-0.5, 0.5, (in_dim, out_dim))
+            v =  np.random.uniform(-0.5, 0.5, (in_dim, out_dim))
+        if one_dim:
+            return v.flatten()
+        return v
 
     def load_data(self) -> None:
         """

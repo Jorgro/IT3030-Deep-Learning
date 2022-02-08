@@ -1,35 +1,21 @@
 {
     "dataset": "dataset.pickle",
     "regularization": "lr2",
-    "regularization_weight": 0.0001,
-    "learning_rate": 0.5,
-    "batch_size": 200,
+    "regularization_weight": 0.00001,
+    "learning_rate": 0.002,
+    "batch_size": 800,
     "loss_function": "CEE",
     "input_dimension": 400,
-    "epochs": 1000,
+    "epochs": 1500,
     "type": "Softmax",
     "layers": [{
-            "size": 20,
-            "activation_function": "ReLU",
-            "learning_rate": 1.0,
-            "weight_range": [-0.5, 0.5],
-            "bias_range": [-0.5, 0.5]
-        },
-        {
-            "size": 20,
-            "activation_function": "ReLU",
-            "learning_rate": 0.8,
-            "weight_range": [-0.5, 0.5],
-            "bias_range": [-0.5, 0.5]
-        },
-        {
-            "size": 10,
+            "size": 30,
             "activation_function": "ReLU",
             "weight_range": [-0.5, 0.5],
             "bias_range": [-0.5, 0.5]
         },
         {
-            "size": 8,
+            "size": 30,
             "activation_function": "ReLU",
             "weight_range": [-0.5, 0.5],
             "bias_range": [-0.5, 0.5]

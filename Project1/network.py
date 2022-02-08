@@ -212,10 +212,10 @@ class NeuralNetwork:
 
         for i in range(self.epochs):
             print("Epoch: ", i + 1)
-            #mini_batch = np.random.choice(
-            #    self.x_train.shape[0], self.mini_batch_size, replace=False
-            #)
-            self.backward_pass(self.x_train, self.y_train)
+            mini_batch = np.random.choice(
+                self.x_train.shape[0], self.mini_batch_size, replace=False
+            )
+            self.backward_pass(self.x_train[mini_batch], self.y_train[mini_batch])
             val_losses.append(self.loss(self.y_val, self.forward_pass(self.x_val)))
             train_losses.append(
                 self.loss(self.y_train, self.forward_pass(self.x_train))
