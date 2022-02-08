@@ -11,5 +11,3 @@ if __name__ == "__main__":
     print("Training network")
     nn.train()
     print(nn)
-
-# lr=1 for Hidden=4
