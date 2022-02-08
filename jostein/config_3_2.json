@@ -1,0 +1,60 @@
+{
+    "dataset": "dataset-j.p",
+    "regularization": "lr2",
+    "regularization_weight": 0.00001,
+    "learning_rate": 0.005,
+    "loss_function": "CEE",
+    "input_dimension": 400,
+    "epochs": 10,
+    "type": "Softmax",
+    "layers": [{
+            "size": 150,
+            "activation_function": "ReLU",
+            "learning_rate": 0.002,
+            "weight_range": "",
+            "bias_range": ""
+        },
+        {
+            "size": 100,
+            "activation_function": "ReLU",
+            "learning_rate": 0.002,
+            "weight_range": "",
+            "bias_range": ""
+        },
+        {
+            "size": 100,
+            "activation_function": "ReLU",
+            "learning_rate": 0.003,
+            "weight_range": "",
+            "bias_range": ""
+        },
+        {
+            "size": 50,
+            "activation_function": "ReLU",
+            "learning_rate": 0.001,
+            "weight_range": "",
+            "bias_range": ""
+        },
+        {
+            "size": 25,
+            "activation_function": "ReLU",
+            "learning_rate": 0.002,
+            "weight_range": "",
+            "bias_range": ""
+        },
+        {
+            "size": 20,
+            "activation_function": "ReLU",
+            "learning_rate": 0.002,
+            "weight_range": "",
+            "bias_range": ""
+        },
+        {
+            "size": 4,
+            "activation_function": "Sigmoid",
+            "learning_rate": 0.003,
+            "weight_range": "",
+            "bias_range": ""
+        }
+    ]
+}

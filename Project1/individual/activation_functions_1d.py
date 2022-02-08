@@ -28,7 +28,7 @@ class ReLU(ActivationFunction):
         return x * (x > 0)
 
     def df(self, x):
-        return (1.0 * (x > 0)).astype(np.float32)
+        return 1.0 * (x > 0)
 
     def __repr__(self):
         return "ReLU"
@@ -57,7 +57,6 @@ class Linear(ActivationFunction):
         return "Linear"
 
 
-# CHANGE!
 class Tanh(ActivationFunction):
     def f(self, x):
         return np.tanh(x)
@@ -71,35 +70,29 @@ class Tanh(ActivationFunction):
 
 class Softmax(ActivationFunction):
     def f(self, x):
-        exp_max = np.exp(x)
-        return exp_max / np.sum(exp_max, axis=1, keepdims=True)
+        exp_max = np.exp(x - np.max(x))
+        return exp_max / np.sum(exp_max)
 
     def df(self, x):
-        _, n = x.shape
-        x = self.f(x)
-        return np.einsum("ij,jk->ijk", x, np.eye(n, n)) - np.einsum("ij,ik->ijk", x, x)
+        return np.diag(x) - np.outer(x, x)
 
     def __repr__(self):
         return "Softmax"
 
 
-if __name__ == "__main__":
-    relu = LeakyReLU()
-    print(relu.df(-0.01))
-    """  arr = np.array([[2, 3, 6, 8], [3, 5, 4, 10]])
-    softmax = Softmax()
-    print(softmax.df(np.array([2, 3])))
-    print(softmax.f(np.array([[2, 3, 6, 8], [3, 5, 4, 10]])))
-    sigmoid = Sigmoid()
-    print(sigmoid.f(np.array([[2, 3, 6, 8], [3, 5, 4, 10]])))
+class MSE:
+    def f(self, y, y_p):
+        return 1 / 2 * np.sum((y_p - y) ** 2)
 
-    a = np.array([np.arange(1, 5)])
-    y = np.array([[0, 1, 0, 0]])
-    s = softmax.f(a)
-    print("s: ", s)
-    c = -y / s
-    print("c: ", c)
-    print("c @ s': ", c @ softmax.df(s))
-    print("s - y: ", s - y)
-    print("Grad: ", c @ softmax.gradient(s)) """
+    def df(self, y, y_p):
+        return y_p - y
+
+
+class CEE:
+    def f(self, y, y_p):
+        return - np.sum(y*np.log(y_p))
+
+    def df(self, y, y_p):
+        return  np.where(y_p != 0, - y / y_p, 0)
+
 

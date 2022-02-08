@@ -42,16 +42,14 @@ class NeuralNetwork:
 
         if self.loss_function == "MSE":
             self.loss_derivative = (
-                lambda y, y_pred: y - y_pred
+                lambda y, y_pred: y_pred - y
             )  # Mean squared derivative
             self.loss = lambda y, y_pred: 1 / y.shape[0] * np.sum((y - y_pred) ** 2)
         elif self.loss_function == "CEE":
-            self.loss_derivative = lambda y, y_pred: y / (
-                y_pred + 1e-6
+            self.loss_derivative = lambda y, y_pred: np.where(
+                y_pred != 0, -y / y_pred, 0
             )  # Cross entropy derivative
-            self.loss = (
-                lambda y, y_pred: -1 / y.shape[0] * np.sum(y * np.log(y_pred + 1e-5))
-            )
+            self.loss = lambda y, y_pred: -1 / y.shape[0] * np.sum(y * np.log(y_pred))
 
         self.output_activation = config["type"]
         print("Output: ", self.output_activation)
@@ -83,7 +81,8 @@ class NeuralNetwork:
             else:
                 lr = self.lr
 
-            no_bias = len(layers) - 1 == i
+            # no_bias = len(layers) - 1 == i
+            no_bias = False
             self.layers.append(
                 Layer(
                     input_dimension,
@@ -176,7 +175,7 @@ class NeuralNetwork:
             )  # J_L/Z = J_L/S * J_S_Z (roughly.. since tensors)
 
         # Softmax + Cross Entropy Loss coulda been simplified with this, but not done for being explicit.
-        #deltas[-1] = y - self.softmax.f(self.layers[-1].activation)
+        # deltas[-1] = y - self.softmax.f(self.layers[-1].activation)
 
         for i in range(len(self.layers) - 2, -1, -1):
             # Simple jacobian vectors since our hidden layer activation functions are linearly independent
@@ -191,16 +190,13 @@ class NeuralNetwork:
             else:
                 prev_activation = self.layers[i - 1].activation.T
 
-            # print(f"Deltas {i}: ", deltas[i])
-            # print(f"Prev activation {i}: ", prev_activation)
-
             # Update weights
-            self.layers[i].weights += self.layers[i].lr / m * (
+            self.layers[i].weights -= self.layers[i].lr / m * (
                 (deltas[i].T @ prev_activation.T)
-            ) - self.alpha * self.regularization(self.layers[i].weights)
-            self.layers[i].bias_weights += self.layers[i].lr / m * (
+            ) + self.alpha * self.regularization(self.layers[i].weights)
+            self.layers[i].bias_weights -= self.layers[i].lr / m * (
                 np.sum(deltas[i], 0).reshape((self.layers[i].output_dim, 1))
-            ) - self.alpha * self.regularization(self.layers[i].bias_weights)
+            ) + self.alpha * self.regularization(self.layers[i].bias_weights)
 
     def train(self):
         if SHOW_IMAGES:
@@ -210,16 +206,25 @@ class NeuralNetwork:
         train_losses = []
         val_losses = []
         epochs = np.linspace(1, self.epochs, self.epochs)
+        initial_lr = []
+        for l in self.layers:
+            initial_lr.append(l.lr)
+
         for i in range(self.epochs):
             print("Epoch: ", i + 1)
-            mini_batch = np.random.choice(
-                self.x_train.shape[0], self.mini_batch_size, replace=False
-            )
-            self.backward_pass(self.x_train[mini_batch], self.y_train[mini_batch])
+            #mini_batch = np.random.choice(
+            #    self.x_train.shape[0], self.mini_batch_size, replace=False
+            #)
+            self.backward_pass(self.x_train, self.y_train)
             val_losses.append(self.loss(self.y_val, self.forward_pass(self.x_val)))
             train_losses.append(
                 self.loss(self.y_train, self.forward_pass(self.x_train))
             )
+
+            # m = 50
+            # for l, i_l in zip(self.layers, initial_lr):
+            # l.lr = i_l / (1 + i / m)
+            #    print("LR: ", l.lr)
 
         pred = self.forward_pass(self.x_test)
         for l in self.layers:
