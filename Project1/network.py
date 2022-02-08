@@ -161,6 +161,7 @@ class NeuralNetwork:
         m = y.shape[0]
         deltas = [[] for _ in range(len(self.layers))]
 
+        # Calculate the first J_L_Z from network output
         if self.output_activation != "Softmax":
             # Linearly independent output activation gives a gradient matrix (examples x gradient vector)
             deltas[-1] = np.multiply(
@@ -183,6 +184,7 @@ class NeuralNetwork:
                 self.layers[i].activation_function.df(self.layers[i].weighted_sums),
                 (deltas[i + 1] @ self.layers[i + 1].weights),
             )
+            # Calculate the J_L/Y = J_L/Z @ J_Z/Y, J_Z/Y = Diag_J_Z/Sum * W
 
         for i in range(len(self.layers) - 1, -1, -1):
             if i == 0:
@@ -190,7 +192,7 @@ class NeuralNetwork:
             else:
                 prev_activation = self.layers[i - 1].activation.T
 
-            # Update weights
+            # Update weights by calculating J_L_W/J_L_B (J_L_W = J_L_Z*J_Z_W_Hat)
             self.layers[i].weights -= self.layers[i].lr / m * (
                 (deltas[i].T @ prev_activation.T)
             ) + self.alpha * self.regularization(self.layers[i].weights)
@@ -221,9 +223,10 @@ class NeuralNetwork:
                 self.loss(self.y_train, self.forward_pass(self.x_train))
             )
 
-            # m = 50
-            # for l, i_l in zip(self.layers, initial_lr):
-            # l.lr = i_l / (1 + i / m)
+            # Reduce learning over time
+            m = 50
+            for l, i_l in zip(self.layers, initial_lr):
+                l.lr = i_l / (1 + i / m)
             #    print("LR: ", l.lr)
 
         pred = self.forward_pass(self.x_test)

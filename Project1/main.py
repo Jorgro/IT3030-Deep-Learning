@@ -1,9 +1,6 @@
 import json
 from network import NeuralNetwork
 
-# TODO:
-# - Fix listed configs
-
 if __name__ == "__main__":
     print("Loading config.")
     with open("Project1/configs/config_3.json") as f:
