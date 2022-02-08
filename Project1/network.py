@@ -6,17 +6,7 @@ import pickle
 from activation_functions import Sigmoid, ReLU, Softmax, Tanh, Linear, LeakyReLU
 import seaborn as sns
 import matplotlib.pyplot as plt
-from flags import VERBOSE, SHOW_IMAGES
-
-
-def show_images(images):
-    _, axarr = plt.subplots(2, 5)
-    n = int(images.shape[1] ** (1 / 2))
-    for i in range(2):
-        for j in range(5):
-            axarr[i, j].imshow(images[i * 5 + j].reshape(n, n))
-    plt.show()
-
+from flags import VERBOSE
 
 class NeuralNetwork:
     def __init__(self, config: dict):
@@ -201,9 +191,6 @@ class NeuralNetwork:
             ) + self.alpha * self.regularization(self.layers[i].bias_weights)
 
     def train(self):
-        if SHOW_IMAGES:
-            images = np.random.choice(self.x_train.shape[0], 10, replace=False)
-            show_images(self.x_train[images])
 
         train_losses = []
         val_losses = []

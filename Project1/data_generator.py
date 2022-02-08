@@ -3,6 +3,8 @@ import numpy as np
 import random
 
 import pickle
+from flags import SHOW_IMAGES
+import matplotlib.pyplot as plt
 
 # One hot encoding of classes
 VERTICAL = np.array([1, 0, 0, 0])
@@ -148,7 +150,32 @@ class DataGenerator:
         img[probs < p] = 1
         return img.flatten()
 
+    @staticmethod
+    def show_images(images):
+        _, axarr = plt.subplots(2, 5)
+        n = int(images.shape[1] ** (1 / 2))
+        for i in range(2):
+            for j in range(5):
+                axarr[i, j].imshow(images[i * 5 + j].reshape(n, n))
+        plt.show()
+
 
 if __name__ == "__main__":
-    dg = DataGenerator([12, 15], [12, 15], [12, 15], [12, 15], [6, 8], 1200, 20, 0.01)
+    dg = DataGenerator(
+        rec_width_range=[12, 15],
+        rec_height_range=[12, 15],
+        ver_length_range=[12, 15],
+        hor_length_range=[12, 15],
+        cro_length_range=[6, 8],
+        nr_images=1200,
+        image_size=20,
+        noise=0.01,
+    )
     dg.generate_datasets()
+
+    if SHOW_IMAGES:
+        with open("dataset.pickle", "rb") as file:
+            data = pickle.load(file)
+            x_train = np.array(data["x_train"])
+        images = np.random.choice(x_train.shape[0], 10, replace=False)
+        DataGenerator.show_images(x_train[images])
