@@ -8,6 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from flags import VERBOSE
 
+
 class NeuralNetwork:
     def __init__(self, config: dict):
         self.config = config

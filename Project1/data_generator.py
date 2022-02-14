@@ -81,7 +81,8 @@ class DataGenerator:
                 )
                 cro = np.zeros((self.image_size, self.image_size))
                 cro = DataGenerator.generate_noise(
-                    DataGenerator.generate_cross(cro, self.cro_length_range), self.noise)
+                    DataGenerator.generate_cross(cro, self.cro_length_range), self.noise
+                )
                 data_x.append(rec.flatten())
                 data_x.append(ver.flatten())
                 data_x.append(hor.flatten())
@@ -95,7 +96,7 @@ class DataGenerator:
             datasets[f"y_{path}"] = np.array(data_y)
 
         # Save datasets in a pickle file
-        with open("dataset.pickle", "wb") as handle:
+        with open("dataset2.pickle", "wb") as handle:
             pickle.dump(datasets, handle)
 
     @staticmethod
@@ -165,11 +166,11 @@ class DataGenerator:
 
 if __name__ == "__main__":
     dg = DataGenerator(
-        rec_width_range=[12, 15],
-        rec_height_range=[12, 15],
-        ver_length_range=[12, 15],
-        hor_length_range=[12, 15],
-        cro_length_range=[6, 8],
+        rec_width_range=[6, 15],
+        rec_height_range=[6, 15],
+        ver_length_range=[6, 15],
+        hor_length_range=[6, 15],
+        cro_length_range=[3, 8],
         nr_images=1200,
         image_size=20,
         noise=0.01,
@@ -177,7 +178,7 @@ if __name__ == "__main__":
     dg.generate_datasets()
 
     if SHOW_IMAGES:
-        with open("dataset.pickle", "rb") as file:
+        with open("dataset2.pickle", "rb") as file:
             data = pickle.load(file)
             x_train = np.array(data["x_train"])
         images = np.random.choice(x_train.shape[0], 10, replace=False)
