@@ -103,8 +103,8 @@ class StackedMNISTData:
             (self.train_images, self.train_labels),
             (self.test_images, self.test_labels),
         ) = mnist.load_data()
-        self.train_images = np.expand_dims(self.train_images, axis=-1)
-        self.test_images = np.expand_dims(self.test_images, axis=-1)
+        self.train_images = np.expand_dims(self.train_images, axis=1)
+        self.test_images = np.expand_dims(self.test_images, axis=1)
         self.train_images, self.train_labels = self.__prepare_data_set(training=True)
         self.test_images, self.test_labels = self.__prepare_data_set(training=False)
 
@@ -152,16 +152,17 @@ class StackedMNISTData:
             indexes = np.random.choice(
                 a=images.shape[0], size=(images.shape[0], self.channels)
             )
+            print(indexes.shape)
 
             # Choose the images to get a thing that is <default_batch_size, 28, 28, self.channels>
             # where the last dim is over the dims of the indexes
             generated_images = np.zeros(
-                shape=(images.shape[0], 28, 28, self.channels), dtype=images.dtype
+                shape=(images.shape[0], self.channels, 28, 28), dtype=images.dtype
             )
             generated_labels = np.zeros(shape=(images.shape[0],), dtype=np.int)
             for channel in range(self.channels):
-                generated_images[:, :, :, channel] = images[
-                    indexes[:, channel], :, :, 0
+                generated_images[:, channel, :, :] = images[
+                    indexes[:, channel], 0, :, :
                 ]
                 generated_labels += np.power(10, channel) * labels[indexes[:, channel]]
 
