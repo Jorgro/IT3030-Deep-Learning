@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 
 class Decoder(nn.Module):
     def __init__(self, encoded_space_dim):
