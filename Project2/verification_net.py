@@ -55,7 +55,7 @@ class VerificationNet:
 
         return done_training
 
-    def train(self, generator: StackedMNISTData, epochs: np.int = 10) -> bool:
+    def train(self, generator: StackedMNISTData, epochs: np.int = 30) -> bool:
         """
         Train model if required. As we have a one-channel model we take care to
         only use the first channel of the data.
