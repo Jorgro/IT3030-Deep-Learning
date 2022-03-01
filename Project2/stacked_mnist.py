@@ -63,6 +63,7 @@ class StackedMNISTData:
     """
 
     def __init__(self, mode: DataMode, default_batch_size: np.int = 256) -> None:
+        print("HELLO?")
         # Load MNIST and put in internals
         self.default_batch_size = default_batch_size
 
@@ -104,6 +105,7 @@ class StackedMNISTData:
             (self.test_images, self.test_labels),
         ) = mnist.load_data()
         self.train_images = np.expand_dims(self.train_images, axis=1)
+        print(self.train_images.shape)
         self.test_images = np.expand_dims(self.test_images, axis=1)
         self.train_images, self.train_labels = self.__prepare_data_set(training=True)
         self.test_images, self.test_labels = self.__prepare_data_set(training=False)
