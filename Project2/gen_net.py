@@ -4,17 +4,26 @@ from stacked_mnist import DataMode, StackedMNISTData
 
 
 class GenerativeNetwork(abc.ABC):
-
-    def __init__(self, file_name, latent_dim):
-        self.file_name = file_name
+    def __init__(self, latent_dim=8, missing=False):
+        self.missing = missing
         self.latent_dim = latent_dim
+        if self.missing:
+            self.file_name = "./models/ae_missing"
+        else:
+            self.file_name = "./models/ae"
 
-    def train(self, epochs: np.int = 10, force_relearn = False):
-        self.done_training = self.load_weights()
-        if not self.done_training or force_relearn:
-            generator = StackedMNISTData(
-                mode=DataMode.MONO_BINARY_COMPLETE, default_batch_size=2048
-            )
+    def train(self, epochs: np.int = 10, force_relearn=False):
+        if not force_relearn:
+            self.done_training = self.load_weights()
+        if force_relearn or not self.done_training:
+            if self.missing:
+                generator = StackedMNISTData(
+                    mode=DataMode.MONO_BINARY_MISSING, default_batch_size=2048
+                )
+            else:
+                generator = StackedMNISTData(
+                    mode=DataMode.MONO_BINARY_COMPLETE, default_batch_size=2048
+                )
             x_train, _ = generator.get_full_data_set(training=True)
             x_test, _ = generator.get_full_data_set(training=False)
 
@@ -48,6 +57,7 @@ class GenerativeNetwork(abc.ABC):
         for i in range(no_channels):
             z = np.random.randn(no_new_samples, self.latent_dim)
             generated[:, :, :, [i]] = self.decoder(z).numpy()
+        return generated
 
     def reconstruct(self, x):
         no_channels = x.shape[-1]
