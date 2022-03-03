@@ -26,7 +26,7 @@ class AutoEncoder(GenerativeNetwork):
             strides=(2, 2),
             padding="valid",
             activation="relu",
-        )(input_img)
+        )(x)
         x = layers.Conv2D(
             filters=64,
             kernel_size=3,
