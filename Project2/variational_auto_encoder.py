@@ -11,7 +11,7 @@ class VariationalAutoEncoder(GenerativeNetwork):
             reduction=tf.keras.losses.Reduction.NONE
         )
 
-    def find_anomalies(self, x, k=10, N=10000):
+    def get_anomalies(self, x, k=10, N=10000):
         no_channels = x.shape[-1]
         decoded_z = np.zeros((N, 28, 28, no_channels))
         for i in range(3):

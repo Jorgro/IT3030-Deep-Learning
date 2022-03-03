@@ -53,7 +53,7 @@ class AutoEncoder(GenerativeNetwork):
         self.decoder = keras.Model(decoder_input, decoded)
         self.encoder = keras.Model(input_img, encoded)
 
-    def find_anomalies(self, x, k=10):
+    def get_anomalies(self, x, k=10):
         reconstructed = self.reconstruct(x)
 
         losses = []
