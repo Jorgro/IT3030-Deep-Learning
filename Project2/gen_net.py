@@ -14,6 +14,7 @@ class GenerativeNetwork(abc.ABC):
             self.file_name = file_name
 
     def train(self, epochs: np.int = 10, force_relearn=False):
+        print(self.file_name)
         if not force_relearn:
             self.done_training = self.load_weights()
         if force_relearn or not self.done_training:
