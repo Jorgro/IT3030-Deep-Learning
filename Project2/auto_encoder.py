@@ -21,6 +21,13 @@ class AutoEncoder(GenerativeNetwork):
             activation="relu",
         )(input_img)
         x = layers.Conv2D(
+            filters=48,
+            kernel_size=3,
+            strides=(2, 2),
+            padding="valid",
+            activation="relu",
+        )(input_img)
+        x = layers.Conv2D(
             filters=64,
             kernel_size=3,
             strides=(2, 2),
@@ -37,7 +44,10 @@ class AutoEncoder(GenerativeNetwork):
         x = layers.Dense(7 * 7 * 32, activation="relu")(x)
         x = layers.Reshape((7, 7, 32))(x)
         x = layers.Conv2DTranspose(
-            filters=64, kernel_size=3, strides=2, padding="same", activation="relu"
+            filters=64, kernel_size=3, strides=1, padding="same", activation="relu"
+        )(x)
+        x = layers.Conv2DTranspose(
+            filters=48, kernel_size=3, strides=2, padding="same", activation="relu"
         )(x)
         x = layers.Conv2DTranspose(
             filters=32, kernel_size=3, strides=2, padding="same", activation="relu"
