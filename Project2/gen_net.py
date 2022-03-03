@@ -1,13 +1,17 @@
 import abc
 import numpy as np
-from Project2.stacked_mnist import DataMode, StackedMNISTData
+from stacked_mnist import DataMode, StackedMNISTData
 
 
-class GenerativeNetwork(abc.ABCMeta):
+class GenerativeNetwork(abc.ABC):
 
-    def train(self, epochs: np.int = 10):
+    def __init__(self, file_name, latent_dim):
+        self.file_name = file_name
+        self.latent_dim = latent_dim
+
+    def train(self, epochs: np.int = 10, force_relearn = False):
         self.done_training = self.load_weights()
-        if not self.done_training:
+        if not self.done_training or force_relearn:
             generator = StackedMNISTData(
                 mode=DataMode.MONO_BINARY_COMPLETE, default_batch_size=2048
             )
@@ -42,7 +46,7 @@ class GenerativeNetwork(abc.ABCMeta):
     def generate_new_samples(self, no_channels=1, no_new_samples=1000):
         generated = np.zeros((no_new_samples, 28, 28, no_channels))
         for i in range(no_channels):
-            z = np.random.randn(no_new_samples, 20)
+            z = np.random.randn(no_new_samples, self.latent_dim)
             generated[:, :, :, [i]] = self.decoder(z).numpy()
 
     def reconstruct(self, x):

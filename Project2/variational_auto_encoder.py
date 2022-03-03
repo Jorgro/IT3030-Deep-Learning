@@ -1,11 +1,12 @@
-from Project2.gen_net import GenerativeNetwork
+from gen_net import GenerativeNetwork
 import numpy as np
 from tensorflow import keras
 import tensorflow as tf
 
 
-def VariationalAutoEncoder(GenerativeNetwork):
+class VariationalAutoEncoder(GenerativeNetwork):
     def __init__(self, file_name="./models/vae", latent_dim=8):
+        super().__init__(file_name, latent_dim)
         self.bce = keras.losses.BinaryCrossentropy(
             reduction=tf.keras.losses.Reduction.NONE
         )
@@ -14,7 +15,7 @@ def VariationalAutoEncoder(GenerativeNetwork):
         no_channels = x.shape[-1]
         decoded_z = np.zeros((N, 28, 28, no_channels))
         for i in range(3):
-            z = np.random.randn(N, 8)
+            z = np.random.randn(N, self.latent_dim)
             decoded_z[:, :, :, [i]] = self.decoder(z).mode()
 
         losses = []
