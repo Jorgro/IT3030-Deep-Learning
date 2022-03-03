@@ -7,7 +7,7 @@ from tensorflow.keras import layers
 
 class AutoEncoder(GenerativeNetwork):
     def __init__(self, latent_dim=8, missing=False):
-        GenerativeNetwork.__init__(self, latent_dim, missing)
+        GenerativeNetwork.__init__(self, "./models/ae", latent_dim, missing)
         self.bce = keras.losses.BinaryCrossentropy()
 
         input_img = keras.Input(shape=(28, 28, 1))

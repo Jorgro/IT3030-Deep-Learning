@@ -1,16 +1,17 @@
 import abc
 import numpy as np
 from stacked_mnist import DataMode, StackedMNISTData
+import tensorflow_probability as tfp
 
 
 class GenerativeNetwork(abc.ABC):
-    def __init__(self, latent_dim=8, missing=False):
+    def __init__(self, file_name, latent_dim=8, missing=False):
         self.missing = missing
         self.latent_dim = latent_dim
         if self.missing:
-            self.file_name = "./models/ae_missing"
+            self.file_name = f"{file_name}_missing"
         else:
-            self.file_name = "./models/ae"
+            self.file_name = file_name
 
     def train(self, epochs: np.int = 10, force_relearn=False):
         if not force_relearn:
@@ -56,13 +57,19 @@ class GenerativeNetwork(abc.ABC):
         generated = np.zeros((no_new_samples, 28, 28, no_channels))
         for i in range(no_channels):
             z = np.random.randn(no_new_samples, self.latent_dim)
-            generated[:, :, :, [i]] = self.decoder(z).numpy()
+            y = self.decoder(z)
+            if isinstance(y, tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible):
+                y = y.mode()
+            generated[:, :, :, [i]] = y.numpy()
         return generated
 
     def reconstruct(self, x):
         no_channels = x.shape[-1]
         reconstructed = np.zeros(x.shape)
         for i in range(no_channels):
-            reconstructed[:, :, :, [i]] = self.model(x[:, :, :, [i]]).numpy()
+            y = self.model(x[:, :, :, [i]])
+            if isinstance(y, tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible):
+                y = y.mode()
+            reconstructed[:, :, :, [i]] = y.numpy()
         return reconstructed
 
