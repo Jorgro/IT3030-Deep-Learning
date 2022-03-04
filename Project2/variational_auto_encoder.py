@@ -26,13 +26,6 @@ class VariationalAutoEncoder(GenerativeNetwork):
             activation="relu",
         )(input_img)
         x = layers.Conv2D(
-            filters=48,
-            kernel_size=3,
-            strides=(2, 2),
-            padding="valid",
-            activation="relu",
-        )(x)
-        x = layers.Conv2D(
             filters=64,
             kernel_size=3,
             strides=(2, 2),
@@ -40,22 +33,21 @@ class VariationalAutoEncoder(GenerativeNetwork):
             activation="relu",
         )(x)
         x = layers.Flatten()(x)
+        x = layers.Dense(256, activation="relu")(x)
         x = layers.Dense(
             tfp.layers.IndependentNormal.params_size(self.latent_dim), activation=None,
         )(x)
         encoded = tfp.layers.IndependentNormal(
             self.latent_dim,
-            activity_regularizer=tfp.layers.KLDivergenceRegularizer(prior, weight=2.0),
+            activity_regularizer=tfp.layers.KLDivergenceRegularizer(prior, weight=0.5),
         )(x)
 
         decoder_input = layers.InputLayer(input_shape=self.latent_dim)(encoded)
-        x = layers.Dense(7 * 7 * 32, activation=None)(decoder_input)
+        x = layers.Dense(256, activation="relu")(x)
+        x = layers.Dense(7 * 7 * 32, activation="relu")(decoder_input)
         x = layers.Reshape((7, 7, 32))(x)
         x = layers.Conv2DTranspose(
-            filters=64, kernel_size=3, strides=1, padding="same", activation="relu"
-        )(x)
-        x = layers.Conv2DTranspose(
-            filters=48, kernel_size=3, strides=2, padding="same", activation="relu"
+            filters=64, kernel_size=3, strides=2, padding="same", activation="relu"
         )(x)
         x = layers.Conv2DTranspose(
             filters=32, kernel_size=3, strides=2, padding="same", activation="relu"
