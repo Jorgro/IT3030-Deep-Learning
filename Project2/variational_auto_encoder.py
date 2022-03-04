@@ -75,11 +75,11 @@ class VariationalAutoEncoder(GenerativeNetwork):
 
         losses = []
         for i in range(x.shape[0]):
-            x = x[i]
-            x = np.repeat(x[np.newaxis, :, :, :], N, axis=0)
-            loss = self.bce(x, decoded_z).numpy()
+            y = x[i]
+            y = np.repeat(y[np.newaxis, :, :, :], N, axis=0)
+            loss = self.bce(y, decoded_z).numpy()
             loss = np.average(loss, axis=(1, 2))
-            loss = np.exp(loss)
+            loss = np.exp(-loss)
             loss = np.sum(loss) / N
             losses.append(loss)
 
