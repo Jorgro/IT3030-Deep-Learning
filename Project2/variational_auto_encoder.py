@@ -79,12 +79,9 @@ class VariationalAutoEncoder(GenerativeNetwork):
             y = np.repeat(y[np.newaxis, :, :, :], N, axis=0)
             loss = self.bce(y, decoded_z).numpy()
             loss = np.average(loss, axis=(1, 2))
-            loss = np.exp(loss)
+            loss = np.exp(-loss)
             loss = np.sum(loss) / N
             losses.append(loss)
-
-        ind = np.argpartition(losses, -k)[
-            -k:
-        ]  # Get the indices of the k largest losses
+        ind = np.argpartition(losses, k)  # Get the indices of the k lowest probabilities
         return ind
 
