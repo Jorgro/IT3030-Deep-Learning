@@ -1,2 +1,2 @@
-model_checkpoint_path: "vae_missing"
-all_model_checkpoint_paths: "vae_missing"
+model_checkpoint_path: "ae_missing"
+all_model_checkpoint_paths: "ae_missing"

@@ -8,7 +8,9 @@ from tensorflow.keras import layers
 class AutoEncoder(GenerativeNetwork):
     def __init__(self, latent_dim=8, missing=False):
         GenerativeNetwork.__init__(self, "./models/ae", latent_dim, missing)
-        self.bce = keras.losses.BinaryCrossentropy()
+        self.bce = keras.losses.BinaryCrossentropy(
+            reduction=tf.keras.losses.Reduction.NONE
+        )
 
         input_img = keras.Input(shape=(28, 28, 1))
 
@@ -65,11 +67,8 @@ class AutoEncoder(GenerativeNetwork):
 
     def get_anomalies(self, x, k=10):
         reconstructed = self.reconstruct(x)
-
-        losses = []
-        for i in range(x.shape[0]):
-            losses.append(self.bce(x[i], reconstructed[i]).numpy())
-
+        losses = self.bce(x, reconstructed).numpy()
+        losses = np.average(losses, axis=(1, 2))
         ind = np.argpartition(losses, -k)[
             -k:
         ]  # Get the indices of the k largest losses
