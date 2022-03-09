@@ -150,8 +150,11 @@ class VerificationNet:
         """
         # Get predictions; only keep those where all channels were "confident enough"
         predictions, beliefs = self.predict(data=data)
+        #print(predictions)
+        #print(beliefs)
         predictions = predictions[beliefs >= tolerance]
         predictability = len(predictions) / len(data)
+
 
         if correct_labels is not None:
             # Drop those that were below threshold
@@ -164,9 +167,9 @@ class VerificationNet:
 
 
 if __name__ == "__main__":
-    gen = StackedMNISTData(mode=DataMode.MONO_FLOAT_COMPLETE, default_batch_size=2048)
+    gen = StackedMNISTData(mode=DataMode.MONO_BINARY_COMPLETE, default_batch_size=2048)
     net = VerificationNet(force_learn=True)
-    net.train(generator=gen, epochs=10)
+    net.train(generator=gen, epochs=20)
 
     # I have no data generator (VAE or whatever) here, so just use a sampled set
     img, labels = gen.get_random_batch(training=False, batch_size=25000)

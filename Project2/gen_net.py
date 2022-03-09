@@ -58,7 +58,7 @@ class GenerativeNetwork(abc.ABC):
     def generate_new_samples(self, no_channels=1, no_new_samples=1000):
         generated = np.zeros((no_new_samples, 28, 28, no_channels))
         for i in range(no_channels):
-            z = np.random.randn(no_new_samples, self.latent_dim)
+            z = np.random.randn(no_new_samples, self.latent_dim) * 100
             y = self.decoder(z)
             if isinstance(y, tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible):
                 y = y.mode()
