@@ -13,7 +13,7 @@ class VariationalAutoEncoder(GenerativeNetwork):
             reduction=tf.keras.losses.Reduction.NONE
         )
 
-        prior = tfp.distributions.Independent(
+        standard_normal = tfp.distributions.Independent(
             tfp.distributions.Normal(loc=tf.zeros(self.latent_dim), scale=1.0),
             reinterpreted_batch_ndims=1,
         )
@@ -37,10 +37,16 @@ class VariationalAutoEncoder(GenerativeNetwork):
         x = layers.Dense(
             tfp.layers.IndependentNormal.params_size(self.latent_dim), activation=None,
         )(x)
+        # self.latent_dim params for both mean and deviation -> Total 2*self.latent_dim
+
         encoded = tfp.layers.IndependentNormal(
             self.latent_dim,
-            activity_regularizer=tfp.layers.KLDivergenceRegularizer(prior, weight=0.5),
+            activity_regularizer=tfp.layers.KLDivergenceRegularizer(
+                standard_normal, weight=0.5
+            ),
         )(x)
+        # Encoded layers as multivariate normal distribution of size self.latent_dim
+        # Also adding loss (regularizer) between this distribution and the prior (standard normal)
 
         decoder_input = layers.InputLayer(input_shape=self.latent_dim)(encoded)
         x = layers.Dense(256, activation="relu")(x)
@@ -57,11 +63,14 @@ class VariationalAutoEncoder(GenerativeNetwork):
         )
         x = layers.Flatten()(x)
         decoded = tfp.layers.IndependentBernoulli((28, 28, 1))(x)
+        # Independent Bernoulli layer works by having the x as input params into a multivariate Bernoulli distribution
+        # for the pixels which we can then sample, mean or mode from.
         self.model = keras.Model(input_img, decoded)
         opt = keras.optimizers.Adam(learning_rate=0.001)
         self.model.compile(
             optimizer=opt, loss=lambda input, output: -output.log_prob(input)
         )
+        # Negative ELBO loss = w*KL_div + neg_log_likelihood
 
         self.decoder = keras.Model(decoder_input, decoded)
         self.encoder = keras.Model(input_img, encoded)
@@ -82,6 +91,8 @@ class VariationalAutoEncoder(GenerativeNetwork):
             loss = np.exp(-loss)
             loss = np.sum(loss) / N
             losses.append(loss)
-        ind = np.argpartition(losses, k)  # Get the indices of the k lowest probabilities
+        ind = np.argpartition(
+            losses, k
+        )  # Get the indices of the k lowest probabilities
         return ind
 

@@ -60,6 +60,7 @@ class GenerativeNetwork(abc.ABC):
         for i in range(no_channels):
             z = np.random.randn(no_new_samples, self.latent_dim) * 100
             y = self.decoder(z)
+            # Yes, very ugly check if output layer is of type probability -> VAE
             if isinstance(y, tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible):
                 y = y.mode()
             generated[:, :, :, [i]] = y.numpy()
