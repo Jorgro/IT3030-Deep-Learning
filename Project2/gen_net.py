@@ -55,10 +55,10 @@ class GenerativeNetwork(abc.ABC):
 
         return done_training
 
-    def generate_new_samples(self, no_channels=1, no_new_samples=1000):
+    def generate_new_samples(self, no_channels=1, no_new_samples=1000, z_scale=1):
         generated = np.zeros((no_new_samples, 28, 28, no_channels))
         for i in range(no_channels):
-            z = np.random.randn(no_new_samples, self.latent_dim) * 100
+            z = np.random.randn(no_new_samples, self.latent_dim) * z_scale
             y = self.decoder(z)
             # Yes, very ugly check if output layer is of type probability -> VAE
             if isinstance(y, tfp.python.layers.internal.distribution_tensor_coercible._TensorCoercible):

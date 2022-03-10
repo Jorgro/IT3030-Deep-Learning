@@ -1,7 +1,14 @@
 from stacked_mnist import StackedMNISTData, DataMode
 from tensorflow import keras
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
+from tensorflow.keras.layers import (
+    Dense,
+    Dropout,
+    Flatten,
+    Conv2D,
+    MaxPooling2D,
+    BatchNormalization,
+)
 import numpy as np
 
 
@@ -21,13 +28,15 @@ class VerificationNet:
         model.add(
             Conv2D(32, kernel_size=(3, 3), activation="relu", input_shape=(28, 28, 1))
         )
-        for _ in range(3):
+        for _ in range(2):
             model.add(Conv2D(64, (3, 3), activation="relu"))
             model.add(MaxPooling2D(pool_size=(2, 2)))
             model.add(Dropout(0.25))
 
+        model.add(Conv2D(128, (3, 3), activation="relu"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Flatten())
-        model.add(Dense(128, activation="relu"))
+        model.add(Dense(512, activation="relu"))
         model.add(Dropout(0.5))
         model.add(Dense(10, activation="softmax"))
 
@@ -42,6 +51,8 @@ class VerificationNet:
 
     def load_weights(self):
         # noinspection PyBroadException
+        if self.force_relearn:
+            return False
         try:
             self.model.load_weights(filepath=self.file_name)
             # print(f"Read model from file, so I do not retrain")
@@ -150,11 +161,10 @@ class VerificationNet:
         """
         # Get predictions; only keep those where all channels were "confident enough"
         predictions, beliefs = self.predict(data=data)
-        #print(predictions)
-        #print(beliefs)
+        # print(predictions)
+        # print(beliefs)
         predictions = predictions[beliefs >= tolerance]
         predictability = len(predictions) / len(data)
-
 
         if correct_labels is not None:
             # Drop those that were below threshold

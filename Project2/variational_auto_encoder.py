@@ -67,8 +67,12 @@ class VariationalAutoEncoder(GenerativeNetwork):
         # for the pixels which we can then sample, mean or mode from.
         self.model = keras.Model(input_img, decoded)
         opt = keras.optimizers.Adam(learning_rate=0.001)
+
+        def neg_log_likelihood(x, y):
+            return -y.log_prob(x)
+
         self.model.compile(
-            optimizer=opt, loss=lambda input, output: -output.log_prob(input)
+            optimizer=opt, loss=neg_log_likelihood
         )
         # Negative ELBO loss = w*KL_div + neg_log_likelihood
 
