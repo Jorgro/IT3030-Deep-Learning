@@ -14,7 +14,7 @@ def plot_random(X, y, N, model):
 
     for i in range(1, columns * rows + 1):
 
-        start_ind = np.random.choice(X.shape[0] - seq_len)
+        start_ind = np.random.choice(X.shape[0] - seq_len - 1)
         model_input = X[start_ind : start_ind + seq_len]
         forecasts = []
 
