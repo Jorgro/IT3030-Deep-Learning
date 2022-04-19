@@ -10,3 +10,5 @@ COLUMNS_TO_NORMALIZE = [
     "flow",
 ]
 COLUMNS_TO_DROP = ["start_time", "river"]
+AVOID_STRUCTURAL_IMBALANCE = False
+

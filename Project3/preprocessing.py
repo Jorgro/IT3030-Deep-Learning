@@ -1,6 +1,8 @@
 from typing import List
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+from scipy import interpolate
+import numpy as np
 
 
 def filter_column_based_on_quantile(df, q, columns):
@@ -43,10 +45,19 @@ def normalize_columns(df, columns: List[str]):
     return df
 
 
-def normalize_based_on_other_df(
-    df_to_transform, df_to_fit, columns
-):
+def normalize_based_on_other_df(df_to_transform, df_to_fit, columns):
     scaler = MinMaxScaler()
     scaler.fit(df_to_fit[columns])
     df_to_transform[columns] = scaler.transform(df_to_transform[columns])
     return df_to_transform
+
+
+def avoid_structural_imbalance(df):
+    df["sum"] = df["flow"].values + df["total"].values
+    tck = interpolate.splrep(np.array(df.index), df["sum"].values, s=15)
+    df["interpolation"] = interpolate.splev(np.array(df.index), tck, der=0)
+    # sns.lineplot(data=df[0:500], x=df.index[0:500], y='interpolation')
+    # sns.lineplot(data=df[0:500], x=df.index[0:500], y='sum')
+    df["diff"] = df["interpolation"].values - df["sum"].values
+    df["y"] = df["y"].values - df["diff"].values
+    return df
