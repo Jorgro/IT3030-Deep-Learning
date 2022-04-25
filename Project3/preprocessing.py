@@ -19,6 +19,7 @@ def add_date_time_features(df):
     df["time_of_day"] = df["start_time"].dt.hour
     df["time_of_week"] = df["start_time"].dt.dayofweek
     df["time_of_year"] = df["start_time"].dt.month - 1
+    df["time_of_year"] = df["start_time"].dt.minute // 5
 
     # This is just to create atleast one of each possible unique value so get_dummies will work even
     # though the dataframe might not have all possible unique values
@@ -31,7 +32,7 @@ def add_date_time_features(df):
     # One hot encode data-time columns
     temp = pd.get_dummies(
         pd.concat([df, df_date_features], keys=[0, 1]),
-        columns=["time_of_day", "time_of_week", "time_of_year"],
+        columns=["time_of_hour", "time_of_day", "time_of_week", "time_of_year"],
     )
 
     # Selecting data from multi index
@@ -52,10 +53,11 @@ def normalize_based_on_other_df(df_to_transform, df_to_fit, columns):
     return df_to_transform
 
 
-def avoid_structural_imbalance(df):
-    sum_prod_flow = -df["flow"].values + df["total"].values
-    tck = interpolate.splrep(np.array(df.index), sum_prod_flow, s=15)
+def add_structural_imbalance(df):
+    sum_prod_flow = -df["flow"] + df["total"]
+    start = (6-df["time_of_hour"][0]) % 12
+    print(start)
+    tck = interpolate.splrep(np.array(df.index), sum_prod_flow, s=1)
     interpolation = interpolate.splev(np.array(df.index), tck, der=0)
-    difference = interpolation - sum_prod_flow
-    df["y"] = df["y"].values - difference
+    df["structural_imbalance"] = interpolation - sum_prod_flow
     return df
