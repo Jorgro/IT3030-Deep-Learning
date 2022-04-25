@@ -1,0 +1,4 @@
+SEQUENCE_LENGTH = 50
+LR=0.00013
+DROPOUT_RATE=0.1
+DATASET="train_dataset.csv"
