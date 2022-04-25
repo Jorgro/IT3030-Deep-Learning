@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import settings
+import model_settings
 import numpy as np
 import keras
 
@@ -10,20 +10,13 @@ def plot_random(X, y, N, model):
     fig = plt.figure(figsize=(20, 20))
     columns = 5
     rows = N // columns
-    seq_len = settings.SEQUENCE_LENGTH
+    seq_len = model_settings.SEQUENCE_LENGTH
 
     for i in range(1, columns * rows + 1):
 
         start_ind = np.random.choice(X.shape[0] - seq_len - 1)
-        model_input = X[start_ind : start_ind + seq_len]
-        forecasts = []
-
-        for pred_no in range(1, forecast_window_len + 1):
-            forecast = model(np.array([model_input]))
-            forecasts.append(forecast[0][0])
-            model_input = X[start_ind + pred_no : start_ind + pred_no + seq_len]
-            model_input[-pred_no:, -1] = np.array(forecasts)
-
+        forecasts = model.forecast(X, start_ind, forecast_window_len)
+        
         fig.add_subplot(rows, columns, i)
         plt.plot(
             range(seq_len - 1, seq_len + forecast_window_len - 1),

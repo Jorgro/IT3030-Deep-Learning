@@ -40,24 +40,22 @@ def add_date_time_features(df):
 
 
 def normalize_columns(df, columns: List[str]):
-    scaler = MinMaxScaler()
+    scaler = MinMaxScaler(feature_range=(-1, 1))
     df[columns] = scaler.fit_transform(df[columns])
     return df
 
 
 def normalize_based_on_other_df(df_to_transform, df_to_fit, columns):
-    scaler = MinMaxScaler()
+    scaler = MinMaxScaler(feature_range=(-1, 1))
     scaler.fit(df_to_fit[columns])
     df_to_transform[columns] = scaler.transform(df_to_transform[columns])
     return df_to_transform
 
 
 def avoid_structural_imbalance(df):
-    df["sum"] = df["flow"].values + df["total"].values
-    tck = interpolate.splrep(np.array(df.index), df["sum"].values, s=15)
-    df["interpolation"] = interpolate.splev(np.array(df.index), tck, der=0)
-    # sns.lineplot(data=df[0:500], x=df.index[0:500], y='interpolation')
-    # sns.lineplot(data=df[0:500], x=df.index[0:500], y='sum')
-    df["diff"] = df["interpolation"].values - df["sum"].values
-    df["y"] = df["y"].values - df["diff"].values
+    sum_prod_flow = -df["flow"].values + df["total"].values
+    tck = interpolate.splrep(np.array(df.index), sum_prod_flow, s=15)
+    interpolation = interpolate.splev(np.array(df.index), tck, der=0)
+    difference = interpolation - sum_prod_flow
+    df["y"] = df["y"].values - difference
     return df
