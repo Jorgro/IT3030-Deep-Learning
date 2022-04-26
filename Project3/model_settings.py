@@ -1,7 +1,7 @@
 SEQUENCE_LENGTH = 50
 LR = 0.00013
 DROPOUT_RATE = 0.1
-DATASET = "train_dataset.csv"
+DATASET = "train_dataset_2.csv"
 COLUMNS_TO_USE = [
     "hydro",
     "micro",
@@ -17,7 +17,6 @@ COLUMNS_TO_USE = [
     "y_yesterday",
     "structural_imbalance",
     "y_prev_24h",
-
     "y_prev"
 ]
 

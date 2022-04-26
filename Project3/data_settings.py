@@ -8,8 +8,11 @@ COLUMNS_TO_NORMALIZE = [
     "y",
     "sys_reg",
     "flow",
+    "structural_imbalance",
+    "interpolation",
+    "sum"
 ]
 COLUMNS_TO_DROP = ["start_time", "river"]
-AVOID_STRUCTURAL_IMBALANCE = True
+AVOID_STRUCTURAL_IMBALANCE = False
 ONE_HOT_ENCODE_TIME = False  # Else use Cos encoding
-GAUSSIAN_NOISE=0.1
+GAUSSIAN_NOISE=0
