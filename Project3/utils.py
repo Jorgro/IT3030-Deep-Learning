@@ -3,6 +3,13 @@ import model_settings
 import numpy as np
 import keras
 
+def reshape_for_LSTM(X, k):
+    n = X.shape[0]
+    X_p = np.zeros([n-k, k, X.shape[1]])
+    for i in range(k, n):
+        X_p[i-k,:, :] = X[i-k:i, :].reshape(1, k, X_p.shape[2])
+
+    return X_p
 
 def plot_random(X, y, N, model):
     forecast_window_len = 24
@@ -16,7 +23,7 @@ def plot_random(X, y, N, model):
 
         start_ind = np.random.choice(X.shape[0] - seq_len - 1)
         forecasts = model.forecast(X, start_ind, forecast_window_len)
-        
+
         fig.add_subplot(rows, columns, i)
         plt.plot(
             range(seq_len - 1, seq_len + forecast_window_len - 1),
