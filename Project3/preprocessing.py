@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from scipy import interpolate
 import numpy as np
+import data_settings as settings
 
 
 def filter_column_based_on_quantile(df, q, columns):
@@ -49,17 +50,13 @@ def add_date_time_features(df, one_hot_encode=False):
     return df
 
 
-def normalize_columns(df, columns: List[str]):
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    df[columns] = scaler.fit_transform(df[columns])
-    return df
-
-
-def normalize_based_on_other_df(df_to_transform, df_to_fit, columns):
-    scaler = MinMaxScaler(feature_range=(-1, 1))
-    scaler.fit(df_to_fit[columns])
-    df_to_transform[columns] = scaler.transform(df_to_transform[columns])
-    return df_to_transform
+def normalize_columns(df, columns: List[str], scaler: MinMaxScaler = None):
+    if not scaler:
+        scaler = MinMaxScaler(feature_range=(-1, 1))
+        df[columns] = scaler.fit_transform(df[columns])
+    else:
+        df[columns] = scaler.transform(df[columns])
+    return df, scaler
 
 
 def add_structural_imbalance(df):
@@ -77,3 +74,37 @@ def add_structural_imbalance(df):
     df["structural_imbalance"] = sum_prod_flow - interpolation
     df["sum"] = sum_prod_flow
     return df
+
+
+def add_lag_features(df):
+    # Previous y lag feature
+    df["y_prev"] = df["y"].shift(1)
+
+    # Add power imbalance from 24 hours ago
+    df["y_prev_24h"] = df["y"].shift(24 * 60 // 5)
+
+    # Mean y yesterday
+    df = pd.merge_asof(
+        df,
+        df.resample("D", on="start_time")["y"].mean().shift(1),
+        right_index=True,
+        left_on="start_time",
+    )
+    df = df.rename(columns={"y_x": "y", "y_y": "y_yesterday"})
+    return df
+
+
+def preprocess_dataframe(df, scaler=None):
+    df = add_date_time_features(df, settings.ONE_HOT_ENCODE_TIME)
+    df = add_structural_imbalance(df)
+    if settings.AVOID_STRUCTURAL_IMBALANCE:
+        df["y"] = df["y"] - df["structural_imbalance"]
+    df = filter_column_based_on_quantile(df, 0.001, settings.COLUMNS_TO_CLAMP)
+    df, scaler = normalize_columns(df, settings.COLUMNS_TO_NORMALIZE, scaler=scaler)
+    df = add_lag_features(df)
+    df["y_prev"] = df["y_prev"] + np.random.normal(
+        0, settings.GAUSSIAN_NOISE, df["y_prev"].shape
+    )
+    df = df.drop(columns=settings.COLUMNS_TO_DROP)
+    return df, scaler
+
