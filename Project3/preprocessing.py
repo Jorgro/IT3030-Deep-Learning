@@ -42,11 +42,15 @@ def add_date_time_features(df, one_hot_encode=False):
         df = temp.xs(0)
         return df
 
-    # Else Cos encoding:
+    # Else cyclical encoding:
     df["time_of_day_cos"] = np.cos(df["time_of_day"] * 2 * np.pi / 24)
     df["time_of_week_cos"] = np.cos(df["time_of_week"] * 2 * np.pi / 7)
     df["time_of_year_cos"] = np.cos(df["time_of_year"] * 2 * np.pi / 12)
     df["time_of_hour_cos"] = np.cos(df["time_of_hour"] * 2 * np.pi / 12)
+    df["time_of_day_sin"] = np.sin(df["time_of_day"] * 2 * np.pi / 24)
+    df["time_of_week_sin"] = np.sin(df["time_of_week"] * 2 * np.pi / 7)
+    df["time_of_year_sin"] = np.sin(df["time_of_year"] * 2 * np.pi / 12)
+    df["time_of_hour_sin"] = np.sin(df["time_of_hour"] * 2 * np.pi / 12)
     return df
 
 
@@ -94,17 +98,18 @@ def add_lag_features(df):
     return df
 
 
-def preprocess_dataframe(df, scaler=None):
+def preprocess_dataframe(df, scaler=None, noise=0):
     df = add_date_time_features(df, settings.ONE_HOT_ENCODE_TIME)
     df = add_structural_imbalance(df)
     if settings.AVOID_STRUCTURAL_IMBALANCE:
         df["y"] = df["y"] - df["structural_imbalance"]
-    df = filter_column_based_on_quantile(df, 0.001, settings.COLUMNS_TO_CLAMP)
+    df = filter_column_based_on_quantile(df, 0.005, settings.COLUMNS_TO_CLAMP)
     df, scaler = normalize_columns(df, settings.COLUMNS_TO_NORMALIZE, scaler=scaler)
     df = add_lag_features(df)
     df["y_prev"] = df["y_prev"] + np.random.normal(
-        0, settings.GAUSSIAN_NOISE, df["y_prev"].shape
+        0, 0, df["y_prev"].shape
     )
     df = df.drop(columns=settings.COLUMNS_TO_DROP)
+    df = df.dropna()
     return df, scaler
 

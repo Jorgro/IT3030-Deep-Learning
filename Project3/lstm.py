@@ -9,7 +9,7 @@ import numpy as np
 
 class LSTM_Model:
     
-    def __init__(self, model_name, input_dim, settings):
+    def __init__(self, model_name, settings):
         self.model_name = model_name
         self.settings = settings
         
@@ -22,9 +22,11 @@ class LSTM_Model:
         
          # Define and compile LSTM model
         self.model = Sequential()
-        self.model.add(LSTM(100, return_sequences=True, input_shape=(settings.SEQUENCE_LENGTH, input_dim)))
-        self.model.add(Dropout(settings.DROPOUT_RATE))
-        self.model.add(LSTM(50, return_sequences=True))
+        self.model.add(LSTM(100, return_sequences=True, input_shape=(settings.SEQUENCE_LENGTH, len(settings.COLUMNS_TO_USE))))
+        #self.model.add(Dropout(settings.DROPOUT_RATE))
+        #self.model.add(LSTM(75, return_sequences=True))
+        #self.model.add(Dropout(settings.DROPOUT_RATE))
+        #self.model.add(LSTM(50, return_sequences=True))
         self.model.add(Dropout(settings.DROPOUT_RATE))
         self.model.add(LSTM(25, return_sequences=False))
         self.model.add(Dropout(settings.DROPOUT_RATE))
@@ -44,16 +46,15 @@ class LSTM_Model:
         # Callbacks for training
         es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', mode='max', verbose=2, patience=5)
         mc = tf.keras.callbacks.ModelCheckpoint(f'./models/{self.model_name}/model.h5', mode='min', verbose=2, save_best_only=True)
-        viz = TrainingVisualizationCb()
+        viz = TrainingVisualizationCb(file_name=f"./models/{self.model_name}/loss.png")
         
         # Train the model 
         history = self.model.fit(X_train, y_train,
                             validation_data=(X_valid, y_valid),
-                            epochs=20, verbose=2, callbacks=[mc, viz])
+                            epochs=self.settings.EPOCHS, verbose=2, callbacks=[mc, viz])
     
     def forecast(self, X, start_ind, forecast_window_len=24):
         seq_len = self.settings.SEQUENCE_LENGTH
-        
         #start_ind = np.random.choice(X.shape[0] - seq_len - 1)
         model_input = X[start_ind : start_ind + seq_len]
         forecasts = []

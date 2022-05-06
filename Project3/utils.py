@@ -2,16 +2,16 @@ import matplotlib.pyplot as plt
 import model_settings
 import numpy as np
 import keras
+import random
 
 def reshape_for_LSTM(X, k):
     n = X.shape[0]
-    X_p = np.zeros([n-k, k, X.shape[1]])
+    X_p = np.zeros((n-k, k, X.shape[1]))
     for i in range(k, n):
         X_p[i-k,:, :] = X[i-k:i, :].reshape(1, k, X_p.shape[2])
-
     return X_p
 
-def plot_random(X, y, N, model):
+def plot_random(X, y, N, model, file_name=None):
     forecast_window_len = 24
 
     fig = plt.figure(figsize=(20, 20))
@@ -21,7 +21,7 @@ def plot_random(X, y, N, model):
 
     for i in range(1, columns * rows + 1):
 
-        start_ind = np.random.choice(X.shape[0] - seq_len - 1)
+        start_ind = random.randint(seq_len, X.shape[0]-seq_len-1)
         forecasts = model.forecast(X, start_ind, forecast_window_len)
 
         fig.add_subplot(rows, columns, i)
@@ -36,11 +36,15 @@ def plot_random(X, y, N, model):
             label="y_pred",
         )
         plt.plot(range(0, seq_len), y[start_ind : start_ind + seq_len], label="hist")
-
+    if file_name:
+        plt.savefig(file_name, bbox_inches='tight')
     plt.show()
 
 
 class TrainingVisualizationCb(keras.callbacks.Callback):
+    def __init__(self, file_name):
+        self.file_name = file_name
+        
     def on_train_begin(self, logs=None):
         self.train_losses = []
         self.val_losses = []
@@ -50,4 +54,6 @@ class TrainingVisualizationCb(keras.callbacks.Callback):
         self.val_losses.append(logs["val_loss"])
         plt.plot(self.train_losses, label="Train loss")
         plt.plot(self.val_losses, label="Val loss")
+        plt.legend(loc="upper left")
+        plt.savefig(self.file_name, bbox_inches='tight')
         plt.show()
