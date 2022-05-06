@@ -1,0 +1,28 @@
+# Tuning process
+
+- Dropout rate
+  - Important for it to not rely too much on some features and memorizing
+  - Too high: Learns less as it generalizes too much.
+  - Too low: Specializes too much.
+  - DR of 10% gave good results
+- Number of layers (neurons to some extent)
+  - Generally do not need a very complex model for this problem.
+  - Did not see any improvements by adding more layers (tried between 3-5 layers in total).
+  - Landed on using 3 layers. 100->25->1
+- Learning rate
+  - Generally notice that the network learns really fast
+  - 0.005 as LR: Bounces around.
+  - Therefore taking a very low learning rate to reach the best local minima (lr=0.00013)
+- Features to use:
+  - Structural imbalance
+  - Encoding of time
+- Sequence length
+  - Did not see any differences between using a long sequence length and a smaller (30 vs. 50 vs. 100)
+  - Decided to just use 50 as longer sequence length leads to more training time. Could make an argument for using 30 though.
+- Epochs
+  - Early stopping
+  - Only saving best model
+- Gaussian noise
+  - Adding gaussian noise to the y_prev value to counter over-reliance on this feature as it can be very inaccurate in the actual use-case of the network.
+  - Too much noise makes the network not use this feature and reduces performance.
+  - A small gaussian noise of 0.05 was found to be optimal to make the network still use the information in this feature, but not overrely on it.
